@@ -134,7 +134,7 @@ class banding:
                             print(LeftBandingCodeTwo)
                             PanelBasics.append(LeftBandingCodeTwo)
                          # 左机加工编码
-                        if i==1:
+                        if i == 1:
                             EBL1 = panel.getAttribute('EBL1')
                             str=''
                             if EBL1 == "":
@@ -154,8 +154,10 @@ class banding:
                                         Face = int(m.getAttribute('Face'))
                                         X = float(m.getAttribute('X'))
                                         Y = float(m.getAttribute('Y'))
-
-                                        if Type == 4:
+                                        if Type == 3:
+                                            str = str.split('+')[0]
+                                            break
+                                        elif Type == 4:
                                             EndX = float(m.getAttribute('EndX'))
                                             EndY = float(m.getAttribute('EndY'))
                                             widthTool = float(m.getAttribute('Width'))
@@ -247,8 +249,10 @@ class banding:
                                         Face = int(m.getAttribute('Face'))
                                         X = float(m.getAttribute('X'))
                                         Y = float(m.getAttribute('Y'))
-
-                                        if Type == 4:
+                                        if Type ==3:
+                                            str=str.split('+')[0]
+                                            break
+                                        elif Type == 4:
                                             EndX = float(m.getAttribute('EndX'))
                                             EndY = float(m.getAttribute('EndY'))
                                             widthTool = float(m.getAttribute('Width'))
@@ -398,7 +402,7 @@ class banding:
                 # 保存按原文件命名  "D:/{}月余料利用率.xls".format(time)
                 path = Folderpath2+'/'+j.split('.')[0]+'.xls'
                 test.save(path)
-                with open(Folderpath2 + "/" + fullPath.split('/')[-1]+"封边后", "w", encoding="UTF-8") as fs:
+                with open(Folderpath2 + "/封边后" + fullPath.split('/')[-1], "w", encoding="UTF-8") as fs:
                     fs.write(xmldoc.toxml())
                     fs.close()
                 yield j
