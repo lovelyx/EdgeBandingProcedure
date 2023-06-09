@@ -39,7 +39,7 @@ class Win_Main :
         QMessageBox.about(
             self.ui,
             '版本信息',
-            '后台封边程序工具V1.1.1\n2023.6.1')
+            '后台封边程序工具V2.2.1\n2023.6.2')
 
     def PatchSignIn(self):
         PachIndex.main()

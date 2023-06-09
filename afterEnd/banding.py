@@ -50,14 +50,11 @@ class banding:
         print(BandingCodingDict)
         # 打开文件夹得到文件夹下的所有文件
         list=[]
-        # window = tkinter.Tk()
-        # window.withdraw()
         xml_list = os.listdir(Folderpath)
         for j in xml_list:  # 遍历所有xml文件
             try:
                 fullPath = Folderpath + "/" + j  # 完整路径
                 list.append(j)
-                # list.append(i)
                 # 打开文件
                 xmldoc = minidom.parse(fullPath)
                 #找到Machining节点（标签）
@@ -67,75 +64,107 @@ class banding:
                     WorkpieceRotation=0
                     for i in range(1,3):
                         PanelBasics = []
+
                         # 二维码
                         QRCode = panel.getAttribute('ID')
                         PanelBasics.append(QRCode)
+
                         # 备注1
                         RemarksOne = panel.getAttribute('BatchNo')
                         PanelBasics.append(RemarksOne)
+
                         # 备注2
                         RemarksTwo = panel.getAttribute('Info4')
                         PanelBasics.append(RemarksTwo)
+
                         # 备注3
                         RemarksThree = panel.getAttribute('ContractNo')
                         PanelBasics.append(RemarksThree)
-                        # 左机预铣
-                        # 右机预铣
+
+
                         # 完工长度
                         FinishedLength = float(panel.getAttribute('Length'))
                         PanelBasics.append(FinishedLength)
+
                         # 完工宽度
                         FinishedWidth = float(panel.getAttribute('Width'))
                         PanelBasics.append(FinishedWidth)
+
                         # 完工厚度
                         FinishedThickness = int(panel.getAttribute('Thickness'))
                         PanelBasics.append(FinishedThickness)
+
                         # 数量
                         Quantity = int(panel.getAttribute('Qty'))
                         PanelBasics.append(Quantity)
+
                         # 进给次序
                         if i == 1:
-                            Order = 1
-                            PanelBasics.append(Order)
+                            if FinishedLength >= FinishedWidth:
+                                WorkpieceRotation = 1
+                                PanelBasics.append(WorkpieceRotation)
+                            elif FinishedLength < FinishedWidth:
+                                WorkpieceRotation = 2
+                                PanelBasics.append(WorkpieceRotation)
                         elif i == 2:
-                            Order = 2
-                            PanelBasics.append(Order)
+                            if WorkpieceRotation == 1:
+                                WorkpieceRotation = 2
+                                PanelBasics.append(WorkpieceRotation)
+                            elif WorkpieceRotation == 2:
+                                WorkpieceRotation = 1
+                                PanelBasics.append(WorkpieceRotation)
+                        # if i == 1:
+                        #     Order = 1
+                        #     PanelBasics.append(Order)
+                        # elif i == 2:
+                        #     Order = 2
+                        #     PanelBasics.append(Order)
+
                         # 工件旋转
                         if i == 1:
-                            if FinishedLength>=FinishedWidth:
-                                WorkpieceRotation = 0
-                                PanelBasics.append(WorkpieceRotation)
-                            elif FinishedLength<FinishedWidth:
-                                WorkpieceRotation = 1
-                                PanelBasics.append(WorkpieceRotation)
-                        elif i== 2:
-                            if WorkpieceRotation == 0:
-                                WorkpieceRotation = 1
-                                PanelBasics.append(WorkpieceRotation)
-                            elif WorkpieceRotation == 1:
-                                WorkpieceRotation = 0
-                                PanelBasics.append(WorkpieceRotation)
+                            Order = 0
+                            PanelBasics.append(Order)
+                        elif i == 2:
+                            Order = 1
+                            PanelBasics.append(Order)
+                        # if i == 1:
+                        #     if FinishedLength>=FinishedWidth:
+                        #         WorkpieceRotation = 0
+                        #         PanelBasics.append(WorkpieceRotation)
+                        #     elif FinishedLength<FinishedWidth:
+                        #         WorkpieceRotation = 1
+                        #         PanelBasics.append(WorkpieceRotation)
+                        # elif i== 2:
+                        #     if WorkpieceRotation == 0:
+                        #         WorkpieceRotation = 1
+                        #         PanelBasics.append(WorkpieceRotation)
+                        #     elif WorkpieceRotation == 1:
+                        #         WorkpieceRotation = 0
+                        #         PanelBasics.append(WorkpieceRotation)
 
                         # 浮动铣刀
                         FloatingCutter = 0
                         PanelBasics.append(FloatingCutter)
+
                         # 速度
                         Speed = 25
                         PanelBasics.append(Speed)
+
                         # 左机封边带编码
                         if i ==1:
                             LeftBandingCodeOne = panel.getAttribute('EBL1')
                             LeftBandingCodeOne=BandingCodingDict[LeftBandingCodeOne.strip()]
-                            print(LeftBandingCodeOne)
                             PanelBasics.append(LeftBandingCodeOne)
                         elif i ==2:
                             LeftBandingCodeTwo = panel.getAttribute('EBW1')
                             LeftBandingCodeTwo = BandingCodingDict[LeftBandingCodeTwo.strip()]
-                            print(LeftBandingCodeTwo)
                             PanelBasics.append(LeftBandingCodeTwo)
-                         # 左机加工编码
+
+                        # 左机加工编码
+                        t = 0
                         if i == 1:
                             EBL1 = panel.getAttribute('EBL1')
+                            EBL2 = panel.getAttribute('EBL2')
                             str=''
                             if EBL1 == "":
                                 str='无封边'
@@ -170,22 +199,99 @@ class banding:
                                                         # 判断走刀方向
                                                         if X < EndX or Y < EndY:
                                                             if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t=1
+                                                                    else:
+                                                                        str=''
+                                                                        t=1
+
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode',"0")
                                                             elif ToolOffset == '右' and (X == 7 or Length - X - widthTool== 7 or Y - widthTool == 7 or Width - Y== 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
+
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '左' and (X - widthTool== 7 or Length - X== 7 or Y== 7 or Width - Y - widthTool == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                         elif X>EndX or Y>EndY:
                                                             if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
+
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '右' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
+
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '左' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
+
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
 
@@ -193,26 +299,101 @@ class banding:
                                                         # 判断走刀方向
                                                         if X < EndX or Y < EndY:
                                                             if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
+
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '右' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
+
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '左' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
+
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                         elif X > EndX or Y > EndY:
                                                             if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '右' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
+
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '左' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBL2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBL2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
+
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
-
-
 
                                                 else:
                                                     continue
@@ -226,11 +407,10 @@ class banding:
                                 str = str.replace('6面槽+5面槽','5&6面槽')
                             elif '5面槽+6面槽' in str :
                                 str = str.replace('5面槽+6面槽', '5&6面槽')
-                            print(str)
-
-
                         elif i==2:
+                            t = 0
                             EBW1 = panel.getAttribute('EBW1')
+                            EBW2 = panel.getAttribute('EBW2')
                             str = ''
                             if EBW1 == "":
                                 str = '无封边'
@@ -265,22 +445,94 @@ class banding:
                                                         # 判断走刀方向
                                                         if X < EndX or Y < EndY:
                                                             if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '右' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '左' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                         elif X > EndX or Y > EndY:
                                                             if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '右' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '左' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+5面槽"
                                                                 m.setAttribute('IsGenCode', "0")
 
@@ -288,22 +540,94 @@ class banding:
                                                         # 判断走刀方向
                                                         if X < EndX or Y < EndY:
                                                             if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '右' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '左' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                         elif X > EndX or Y > EndY:
                                                             if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '右' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
                                                             elif ToolOffset == '左' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
+                                                                if str=='1.0mm封边':
+                                                                    if '▲▲▲▲' in EBW2:
+                                                                        str = '1.0mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    elif '△△△△' in EBW2:
+                                                                        str = '0.5mm封边'
+                                                                        PanelBasics[12]=(BandingCodingDict[EBW2.strip()])
+                                                                        t = 1
+                                                                    else:
+                                                                        str = ''
+                                                                        t = 1
                                                                 str = str + "+6面槽"
                                                                 m.setAttribute('IsGenCode', "0")
 
@@ -321,28 +645,26 @@ class banding:
                                 str = str.replace('6面槽+5面槽', '5&6面槽')
                             elif '5面槽+6面槽' in str:
                                 str = str.replace('5面槽+6面槽', '5&6面槽')
-                            print(str)
-
-
-
                         LeftProcessingCode=ProcessingDict[str]
-                        print(LeftProcessingCode)
                         PanelBasics.append(LeftProcessingCode)
 
                         # 右机封边带编码
                         if i == 1:
                             RightBandingCodeOne = panel.getAttribute('EBL2')
                             RightBandingCodeOne = BandingCodingDict[RightBandingCodeOne.strip()]
-                            print(RightBandingCodeOne)
                             PanelBasics.append(RightBandingCodeOne)
                         elif i == 2:
                             RigthBandingCodeTwo = panel.getAttribute('EBW2')
                             RigthBandingCodeTwo = BandingCodingDict[RigthBandingCodeTwo.strip()]
-                            print(RigthBandingCodeTwo)
                             PanelBasics.append(RigthBandingCodeTwo)
+
                         # 右机加工编码
                         if i == 1:
-                            EBL2 = panel.getAttribute('EBL2')
+                            if t == 0:
+                                EBL2 = panel.getAttribute('EBL2')
+                            elif t == 1:
+                                EBL2 = panel.getAttribute('EBL1')
+                                PanelBasics[14]=BandingCodingDict[EBL2.strip()]
                             str = ''
                             if EBL2 == "":
                                 str = '无封边'
@@ -352,9 +674,13 @@ class banding:
                                 elif '△△△△' in EBL2:
                                     str = '0.5mm封边'
                                 str += '+跟踪'
-                            print(str)
                         elif i == 2:
-                            EBW2 = panel.getAttribute('EBW2')
+                            if t == 0:
+                                EBW2 = panel.getAttribute('EBW2')
+                            elif t == 1:
+                                EBW2 = panel.getAttribute('EBW1')
+                                PanelBasics[14] = BandingCodingDict[EBW2.strip()]
+
                             str = ''
                             if EBW2 == "":
                                 str = '无封边'
@@ -365,12 +691,8 @@ class banding:
                                     str = '0.5mm封边'
 
                                 str += '+跟踪'
-                            print(str)
                         RightProcessingCode =ProcessingDict[str]
-                        print(RightProcessingCode)
                         PanelBasics.append(RightProcessingCode)
-
-
 
                         #左右机预铣
                         EdgeGroups = panel.getElementsByTagName("EdgeGroup")
