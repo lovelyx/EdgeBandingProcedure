@@ -20,8 +20,8 @@
   <widget class="QPushButton" name="save">
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>350</y>
+     <x>350</x>
+     <y>470</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -34,55 +34,174 @@
    <property name="geometry">
     <rect>
      <x>230</x>
-     <y>180</y>
-     <width>131</width>
-     <height>51</height>
+     <y>160</y>
+     <width>121</width>
+     <height>41</height>
     </rect>
    </property>
    <property name="text">
-    <string>选择输出路径</string>
+    <string>选择Excel输出路径</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEditOut">
    <property name="geometry">
     <rect>
-     <x>430</x>
-     <y>180</y>
-     <width>281</width>
-     <height>51</height>
+     <x>420</x>
+     <y>150</y>
+     <width>261</width>
+     <height>41</height>
     </rect>
    </property>
    <property name="text">
     <string>D:\处理后的文件</string>
    </property>
+   <property name="placeholderText">
+    <string>输出Excel路径</string>
+   </property>
   </widget>
   <widget class="QLineEdit" name="lineEditInput">
    <property name="geometry">
     <rect>
-     <x>430</x>
-     <y>80</y>
-     <width>281</width>
-     <height>51</height>
+     <x>420</x>
+     <y>40</y>
+     <width>261</width>
+     <height>41</height>
     </rect>
    </property>
    <property name="text">
     <string>D:\原文件</string>
    </property>
    <property name="placeholderText">
-    <string>输入路径</string>
+    <string>输入Xml路径</string>
    </property>
   </widget>
   <widget class="QPushButton" name="ButtonInput">
    <property name="geometry">
     <rect>
      <x>230</x>
-     <y>80</y>
-     <width>131</width>
-     <height>51</height>
+     <y>40</y>
+     <width>121</width>
+     <height>41</height>
     </rect>
    </property>
    <property name="text">
-    <string>选择输入路径</string>
+    <string>选择Xml输入路径</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ButtonOut_2">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>220</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>选择Xml输出路径</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEditOut_2">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>220</y>
+     <width>261</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>D:\处理后的文件</string>
+   </property>
+   <property name="placeholderText">
+    <string>输出Xml路径</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ButtonOut_3">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>280</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>选择MPR输出路径</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEditOut_3">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>280</y>
+     <width>261</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>D:\处理后的文件</string>
+   </property>
+   <property name="placeholderText">
+    <string>输出MPR路径</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ButtonInput_2">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>100</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>选择MPR输入路径</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEditInput_2">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>90</y>
+     <width>261</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>D:\原文件</string>
+   </property>
+   <property name="placeholderText">
+    <string>输入MPR路径</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ButtonOut_4">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>340</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>选择CSV存放路径</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEditOut_4">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>340</y>
+     <width>261</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>D:\处理后的文件</string>
+   </property>
+   <property name="placeholderText">
+    <string>输出MPR路径</string>
    </property>
   </widget>
  </widget>
