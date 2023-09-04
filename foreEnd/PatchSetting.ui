@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>893</width>
-    <height>528</height>
+    <width>937</width>
+    <height>552</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -202,6 +202,22 @@
    </property>
    <property name="placeholderText">
     <string>输出MPR路径</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>170</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>浮动铣刀</string>
    </property>
   </widget>
  </widget>

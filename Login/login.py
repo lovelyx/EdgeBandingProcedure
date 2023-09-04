@@ -51,7 +51,7 @@ class Win_Login:
         # re=True
         # re = sqlUnit.selectUnit(username, password)
         if re:
-            index.index()
+            index.index(username)
         else:
             QMessageBox.warning(
                 self.ui,

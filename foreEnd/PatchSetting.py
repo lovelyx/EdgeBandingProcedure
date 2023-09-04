@@ -1,3 +1,5 @@
+import json
+
 from PySide2.QtCore import QSettings
 from PySide2.QtWidgets import QFileDialog,QMessageBox
 from PySide2.QtUiTools import QUiLoader
@@ -20,6 +22,7 @@ class Patch_Main:
         self.ui.ButtonOut_2.clicked.connect(self.XmloutputPacth)
         self.ui.ButtonOut_3.clicked.connect(self.MproutputPacth)
         self.ui.ButtonOut_4.clicked.connect(self.SawCsvoutputPacth)
+        self.ui.checkBox.stateChanged.connect(self.checkF)
         self.ui.save.clicked.connect(self.save_login_info)
 
 
@@ -55,6 +58,14 @@ class Patch_Main:
         print(FileDirectory)
 
 
+    def checkF(self):
+        if self.ui.checkBox.isChecked():
+            self.ui.checkBox.setChecked(False)
+        else:
+            self.ui.checkBox.setChecked(True)
+
+
+
     ##保存lineEdit中内容
     def save_login_info(self):
         settings = QSettings("config.ini", QSettings.IniFormat)
@@ -64,6 +75,11 @@ class Patch_Main:
         settings.setValue("XmlOutput",self.ui.lineEditOut_2.text())
         settings.setValue("MprOutput", self.ui.lineEditOut_3.text())
         settings.setValue("SawCsvOutput", self.ui.lineEditOut_4.text())
+        if self.ui.checkBox.isChecked()==True:
+            g = 1
+        else:
+            g=0
+        settings.setValue("CheckBoxf",g)
         QMessageBox.information(self.ui,'保存','保存成功')
         self.ui.close()
 
@@ -76,6 +92,7 @@ class Patch_Main:
         XmlOutput= settings.value("XmlOutput")
         MprOutput = settings.value("MprOutput")
         SawCsvOutput = settings.value("SawCsvOutput")
+        CheckBoxf = settings.value("CheckBoxf")
 
 
 
@@ -85,6 +102,12 @@ class Patch_Main:
         self.ui.lineEditOut_2.setText(XmlOutput)
         self.ui.lineEditOut_3.setText(MprOutput)
         self.ui.lineEditOut_4.setText(SawCsvOutput)
+        y=True
+        if int(CheckBoxf) == 1:
+            y = True
+        elif int(CheckBoxf) == 0:
+            y = False
+        self.ui.checkBox.setChecked(y)
 
 
 

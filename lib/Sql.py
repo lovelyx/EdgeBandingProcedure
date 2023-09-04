@@ -72,6 +72,7 @@ class SqlUnit():
 
         cursor = self.conn.cursor()
         # a = "松仁、秉峰、泳纪海奉、威剑、颂和、祥益、腾恩、柏铄、孟深、忠庄、轩哲、铠鑫、仕伦、儒亿、积进信钦、贤元、程基、安泉、树昌、祝斌、一科、游湖、普济、中坚"
+        # 'Reference', 'Decor', 'Materialflow', 'BatchNumber', 'CustomerNumber', 'Length','Width', 'Thickness', 'Quantity', 'passValue', 'FeedSpeed', 'Orientation','OverSizeM1', 'EdgeMacroLM1', 'ProgramM1', 'OverSizeM2', 'EdgeMacroRM2', 'ProgramM2'
         # a = a.split("、")
         # for i in range(len(a)):
         #     sql_insert = f"insert into Student Values({i},'{a[i]}',18)"
@@ -80,12 +81,14 @@ class SqlUnit():
         #     self.conn.commit()
         # VALUES( % s);' % ', '.join(params)
         # ",".join(map(str, data))
-        sql_insert = 'INSERT INTO HT_EdgeData  VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        sql_insert = 'INSERT INTO HT_EdgeData (CreateTime,Reference,MemoOne,MemoTwo,MemoThree,CustomerNumber,Length,Width,Thickness,Quantity,passValue,FeedSpeed,Orientation,OverSizeM1,EdgeMacroLM1,ProgramM1,OverSizeM2,EdgeMacroRM2,ProgramM2,UserName) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        print(data)
         DataTuple=list(map(tuple, data))
         # cursor.execute(sql_insert)
         cursor.executemany(sql_insert,DataTuple)
         self.conn.commit()
         cursor.close()
+        return
         # self.conn.close()
     def UpdataUnit(self):
         # ----------------------------------------------------------------------------
@@ -134,6 +137,21 @@ class SqlUnit():
         row = cursor.fetchall()
         list = row
         sql_select = "select * from HT_BandingCode"
+        cursor.execute(sql_select)
+        row2 = cursor.fetchall()
+        list2=row2
+        cursor.close()
+        # self.conn.close()
+
+        return list,list2
+
+    def selectBandingProcessingFive(self):
+        cursor=self.conn.cursor()
+        sql_select = "select * from HT_BandingProcessingFive"
+        cursor.execute(sql_select)
+        row = cursor.fetchall()
+        list = row
+        sql_select = "select * from HT_BandingCodeFive"
         cursor.execute(sql_select)
         row2 = cursor.fetchall()
         list2=row2

@@ -22,11 +22,22 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="Buttonbanding">
-        <property name="text">
-         <string>封边程序处理</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="Buttonbanding2">
+          <property name="text">
+           <string>五楼封边</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="Buttonbanding">
+          <property name="text">
+           <string>四楼封边</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="QTextBrowser" name="textBrowser"/>
