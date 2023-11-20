@@ -1,5 +1,6 @@
 import shutil
 import time
+import cryptocode
 
 from PyQt5.QtWidgets import QAction, qApp
 from PySide2 import QtCore
@@ -15,6 +16,8 @@ import afterEnd.banding2 as banding
 import afterEnd.bandingFive as bandingFive
 import afterEnd.Shield as shield
 import afterEnd.compress as zip
+import foreEnd.SqlSet as sqlset
+import afterEnd.MprProcessing as Mpr
 
 from lib.share import SI
 import os
@@ -33,22 +36,26 @@ class Win_Main():
         self.ui.ExitAction.triggered.connect(self.ExitAction)
         self.ui.Buttonbanding.clicked.connect(self.BandingExt)
         self.ui.Buttonbanding2.clicked.connect(self.BandingExtFive)
+        self.ui.MprProcessing.clicked.connect(self.MprProcessing)
         self.ui.sqlActionc.triggered.connect(self.sqlActionc)
         # self.ui.ButtonAvailability.clicked.connect(self.Availability)
         self.ui.VersionAction.triggered.connect(self.about)
 
     def sqlActionc(self):
-        QMessageBox.warning(
-                self.ui,
-                '提示',
-                "用户无权限")
+        if self.username=='admin':
+            sqlset.main()
+        else:
+            QMessageBox.warning(
+                    self.ui,
+                    '提示',
+                    "用户无权限")
 
 
     def about(self):
         QMessageBox.about(
             self.ui,
             '版本信息',
-            '后台封边程序工具V3.3.0\n2023.8.5')
+            '后台封边程序工具V4.2.3\n2023.11.17')
 
     def PatchSignIn(self):
         PachIndex.main()
@@ -83,15 +90,24 @@ class Win_Main():
         MprOutput = settings.value("MprOutput")
         SawCsvOutput = settings.value("SawCsvOutput")
         CheckBoxf = settings.value("CheckBoxf")
+        sqlIp = settings.value("sqlIp")
+        edt_username = settings.value("edt_username")
+        edt_password = settings.value("edt_password")
+        sqlIp = cryptocode.decrypt(sqlIp, "kfht.")
+        edt_username = cryptocode.decrypt(edt_username, "kfht.")
+        edt_password = cryptocode.decrypt(edt_password, "kfht.")
+
         IdList = []
+        IdDictNo = {}
         # 按钮禁用
         self.ui.Buttonbanding.setEnabled(False)
         self.ui.Buttonbanding2.setEnabled(False)
+        self.ui.MprProcessing.setEnabled(False)
         self.ui.textBrowser.append('开始处理')
         def run():
             self.deletefile(XmlOutput)
             self.deletefile(MprOutput)
-            lsi,SqlUnit = banding.main(XmlInput,CsvOutput,XmlOutput,SawCsvOutput,IdList,CheckBoxf,self.username)
+            lsi,SqlUnit = banding.main(XmlInput,CsvOutput,XmlOutput,SawCsvOutput,IdList,CheckBoxf,self.username,IdDictNo,sqlIp,edt_username,edt_password)
             num = 0
             for i in lsi:
                 num+=1
@@ -102,13 +118,14 @@ class Win_Main():
             self.ui.textBrowser.append(f'xml处理完成,共处理{num}个文件')
             self.ui.textBrowser.append(f'正在处理MPR文件,请稍后.........')
             self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
-            # print(IdList)
-            shield.main(MprInput,MprOutput,IdList)
+            print(f'IdDictNo{IdDictNo}')
+            shield.main(MprInput,MprOutput,IdList,IdDictNo)
             print("mpr处理完成")
             self.ui.textBrowser.append(f'MPR文件处理完成')
             self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
             self.ui.Buttonbanding.setEnabled(True)
             self.ui.Buttonbanding2.setEnabled(True)
+            self.ui.MprProcessing.setEnabled(True)
 
 
             SqlUnit.conn.close()
@@ -148,15 +165,23 @@ class Win_Main():
         MprOutput = settings.value("MprOutput")
         SawCsvOutput = settings.value("SawCsvOutput")
         # CheckBoxf = settings.value("CheckBoxf")
+        sqlIp = settings.value("sqlIp")
+        edt_username = settings.value("edt_username")
+        edt_password = settings.value("edt_password")
+        sqlIp = cryptocode.decrypt(sqlIp, "kfht.")
+        edt_username = cryptocode.decrypt(edt_username, "kfht.")
+        edt_password = cryptocode.decrypt(edt_password, "kfht.")
         CheckBoxf=True
         IdList = []
+        IdDictNo=[]
         # 按钮禁用
         self.ui.Buttonbanding.setEnabled(False)
         self.ui.Buttonbanding2.setEnabled(False)
+        self.ui.MprProcessing.setEnabled(False)
         self.ui.textBrowser.append('开始处理')
 
         def run():
-            lsi, SqlUnit = bandingFive.main(XmlInput, CsvOutput, XmlOutput, SawCsvOutput, IdList, CheckBoxf)
+            lsi, SqlUnit = bandingFive.main(XmlInput, CsvOutput, XmlOutput, SawCsvOutput, IdList, CheckBoxf, self.username,sqlIp,edt_username,edt_password)
             num = 0
             for i in lsi:
                 num += 1
@@ -165,15 +190,16 @@ class Win_Main():
                 # 定位鼠标到最后一行中
                 self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
             self.ui.textBrowser.append(f'xml处理完成,共处理{num}个文件')
-            self.ui.textBrowser.append(f'正在处理MPR文件,请稍后.........')
-            self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
-            # print(IdList)
-            shield.main(MprInput, MprOutput, IdList)
-            print("mpr处理完成")
-            self.ui.textBrowser.append(f'MPR文件处理完成')
+            # self.ui.textBrowser.append(f'正在处理MPR文件,请稍后.........')
+            # self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
+            # # print(IdList)
+            # shield.main(MprInput, MprOutput, IdList,IdDictNo)
+            # print("mpr处理完成")
+            # self.ui.textBrowser.append(f'MPR文件处理完成')
             self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
             self.ui.Buttonbanding.setEnabled(True)
             self.ui.Buttonbanding2.setEnabled(True)
+            self.ui.MprProcessing.setEnabled(True)
 
             SqlUnit.conn.close()
             print('关闭成功')
@@ -183,6 +209,47 @@ class Win_Main():
         t.setDaemon(True)
         t.start()
 
+    def MprProcessing(self):
+        settings = QSettings("config.ini", QSettings.IniFormat)
+        XmlInput= settings.value("XmlInput")
+        MprInput = settings.value("MprInput")
+        CsvOutput= settings.value("CsvOutput")
+        XmlOutput = settings.value("XmlOutput")
+        MprOutput = settings.value("MprOutput")
+        SawCsvOutput = settings.value("SawCsvOutput")
+        CheckBoxf = settings.value("CheckBoxf")
+        sqlIp = settings.value("sqlIp")
+        edt_username = settings.value("edt_username")
+        edt_password = settings.value("edt_password")
+        sqlIp = cryptocode.decrypt(sqlIp, "kfht.")
+        edt_username = cryptocode.decrypt(edt_username, "kfht.")
+        edt_password = cryptocode.decrypt(edt_password, "kfht.")
+
+        IdList = []
+        IdDictNo = {}
+        # 按钮禁用
+        self.ui.Buttonbanding.setEnabled(False)
+        self.ui.Buttonbanding2.setEnabled(False)
+        self.ui.MprProcessing.setEnabled(False)
+        self.ui.textBrowser.append('开始处理')
+        def run():
+            # self.deletefile(XmlOutput)
+            self.deletefile(MprOutput)
+
+            self.ui.textBrowser.append(f'正在处理MPR文件,请稍后.........')
+            self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
+            Mpr.main(MprInput,MprOutput)
+            print("mpr处理完成")
+            self.ui.textBrowser.append(f'MPR文件处理完成')
+            self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
+            self.ui.Buttonbanding.setEnabled(True)
+            self.ui.Buttonbanding2.setEnabled(True)
+            self.ui.MprProcessing.setEnabled(True)
+
+        # 多线程运行
+        t = Thread(target=run)
+        t.setDaemon(True)
+        t.start()
 
 
 

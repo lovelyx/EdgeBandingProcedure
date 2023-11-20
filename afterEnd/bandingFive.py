@@ -12,13 +12,14 @@ import pandas as pd
 from afterEnd.page.My_sheet import My_sheet
 from afterEnd.page.styleT import style
 import lib.Sql as sqlUnit
+import datetime
 
 class banding:
     def __init__(self):
         self.changeWwidth
 
     # 修改csv文件堆垛
-    def SawCsv(self,CsvIdFileQ,CsvIdFileQL,CsvIdFileKc,path,file):
+    def SawCsv(self,CsvIdFileQ,CsvIdFileQL,CsvIdFileKc,path,file,CsvIdFileC):
         """
         处理满足条件的csv中的堆垛信息
         :param CsvIdFile: 保存满足条件的二维码+
@@ -26,11 +27,11 @@ class banding:
         :param file: 正在处理的csv的文件名
         :return:
         """
-        print(CsvIdFileQ)
-        print(CsvIdFileQL)
-        print(CsvIdFileKc)
+        # print(CsvIdFileQ)
+        # print(CsvIdFileQL)
+        # print(CsvIdFileKc)
         fullPath = path + "/" + file.split(".")[0] +'.csv'  # 完整路径
-        print(fullPath)
+        # print(fullPath)
         csvData = pd.read_csv(fullPath,encoding='gb18030')
         df = pd.DataFrame(csvData)
         # print(csvData)
@@ -45,11 +46,23 @@ class banding:
             if i.split('N')[1] in CsvIdFileQ:
                 df.loc[index, '301'] = 'Q'
                 df.loc[index, 'info7'] = 'Q'
-                df.loc[index, '开料宽'] = float(df.loc[index, '开料宽']) + 2
-            if i.split('N')[1] in CsvIdFileQL:
+                if i.split('N')[1] in CsvIdFileC:
+                    length = df.loc[index,'开料长']
+                    width = df.loc[index, '开料宽']
+                    if float(length)>float(width):
+                        df.loc[index, '开料宽'] = float(df.loc[index, '开料宽']) + 1
+                    elif float(length)<float(width):
+                        df.loc[index, '开料长'] = float(df.loc[index, '开料长']) + 1
+            elif i.split('N')[1] in CsvIdFileQL:
                 df.loc[index, '301'] = 'QL'
                 df.loc[index, 'info7'] = 'QL'
-                df.loc[index, '开料长'] = float(df.loc[index,'开料长'])+2
+                if i.split('N')[1] in CsvIdFileC:
+                    length = df.loc[index, '开料长']
+                    width = df.loc[index, '开料宽']
+                    if float(length) > float(width):
+                        df.loc[index, '开料宽'] = float(df.loc[index, '开料宽']) + 1
+                    elif float(length) < float(width):
+                        df.loc[index, '开料长'] = float(df.loc[index, '开料长']) + 1
         df.to_csv(fullPath, index=False,encoding='gb18030')
 
         return
@@ -203,26 +216,15 @@ class banding:
         :return:
         """
         # 设置变量宽大于长时判断标准槽时，长宽，坐标也要对应变化
-        bianlian = 0;
         if i == 1:
-            # if FinishedLength >= FinishedWidth:
-            #     WorkpieceRotation = 1
-            #
-            #     PanelBasics.append(int(WorkpieceRotation))
-            # elif FinishedLength < FinishedWidth:
-            #     WorkpieceRotation = 0
-            #     bianlian = 1
             WorkpieceRotation = 1
-            bianlian = 1
             PanelBasics.append(int(WorkpieceRotation))
         elif i == 2:
             if WorkpieceRotation == 1:
                 WorkpieceRotation = 0
-
                 PanelBasics.append(int(WorkpieceRotation))
             elif WorkpieceRotation == 0:
                 WorkpieceRotation = 1
-                # bianlian = 1
                 PanelBasics.append(int(WorkpieceRotation))
 
         return WorkpieceRotation
@@ -239,10 +241,6 @@ class banding:
         :return:
         """
         if i == 2:
-            # if bianlian ==1:
-            #     LeftBandingCodeOne = panel.getAttribute('EBW1')
-            # else:
-            #     LeftBandingCodeOne = panel.getAttribute('EBL1')
             LeftBandingCodeOne = panel.getAttribute('EBL1')
             if LeftBandingCodeOne == "":
                 LeftBandingCodeOne = "无封边"
@@ -252,10 +250,6 @@ class banding:
                 LeftBandingCodeOne = BandingCodingDict[LeftBandingCodeOne.strip()]
             PanelBasics.append(LeftBandingCodeOne)
         elif i == 1:
-            # if bianlian ==1:
-            #     LeftBandingCodeTwo = panel.getAttribute('EBL1')
-            # else:
-            #     LeftBandingCodeTwo = panel.getAttribute('EBW1')
             LeftBandingCodeTwo = panel.getAttribute('EBW1')
             if LeftBandingCodeTwo == "":
                 LeftBandingCodeTwo = "无封边"
@@ -263,7 +257,6 @@ class banding:
             else:
                 LeftBandingCodeTwo = LeftBandingCodeTwo +'+'+ str(int(Thick))
                 LeftBandingCodeTwo = BandingCodingDict[LeftBandingCodeTwo.strip()]
-            # LeftBandingCodeTwo = BandingCodingDict[LeftBandingCodeTwo.strip()]
             PanelBasics.append(LeftBandingCodeTwo)
 
         return
@@ -309,7 +302,7 @@ class banding:
         return t,strname
 
     # 左机加工编码
-    def LeftProcessCode(self,i, panel, PanelBasics,FinishedLength,FinishedWidth,BandingCodingDict,QRCode,IdFile,CsvIdFileQ,CsvIdFileQL,ProcessingDict):
+    def LeftProcessCode(self,i, panel, PanelBasics,ProcessingDict,floatingCutter):
         """
         左机加工编码
         :param i: 第几行数据
@@ -329,14 +322,7 @@ class banding:
         # 控制厚边右机封
         t=0
         if i == 2:
-            # if bianlian==1:
-            #     EBL1 = panel.getAttribute('EBW1')
-            #     EBL2 = panel.getAttribute('EBW2')
-            # elif bianlian==0:
-            #     EBL1 = panel.getAttribute('EBL1')
-            #     EBL2 = panel.getAttribute('EBL2')
             EBL1 = panel.getAttribute('EBL1')
-            EBL2 = panel.getAttribute('EBL2')
             strname = ''
             if EBL1 == "":
                 strname = '无封边'
@@ -345,334 +331,11 @@ class banding:
                     strname = '1.0mm封边'
                 elif '△△△△' in EBL1:
                     strname = '0.5mm封边'
-                # Length = float(panel.getAttribute('Length'))
-                # Width = float(panel.getAttribute('Width'))
-                Length = FinishedLength
-                Width = FinishedWidth
-                ID = panel.getAttribute('ID')
-                Machines = panel.getElementsByTagName("Machines")
-
-                for Machining in Machines:
-                    macin = Machining.getElementsByTagName("Machining")
-                    for m in macin:
-                        Type = int(m.getAttribute('Type'))
-                        Face = int(m.getAttribute('Face'))
-                        X = float(m.getAttribute('X'))
-                        Y = float(m.getAttribute('Y'))
-                        if Type == 3:
-                            strname = strname.split('+')[0]
-                            break
-                        elif Type == 4:
-                            EndX = float(m.getAttribute('EndX'))
-                            EndY = float(m.getAttribute('EndY'))
-                            widthTool = float(m.getAttribute('Width'))
-                            ToolOffset = m.getAttribute('ToolOffset')
-
-                            # 判断槽宽
-                            if widthTool == 13:
-                                # if bianlian == 0:
-                                # 判断通槽
-                                if (abs(EndX - X) == Length and abs(EndY - Y) == 0):
-                                    if Face == 5:
-                                        # 判断走刀方向
-                                        if X < EndX or Y < EndY:
-                                            if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                                                t,strname=self.Slotting(strname,EBL2,PanelBasics,BandingCodingDict,panel,m,QRCode,Face,IdFile,CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '右' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                                                t,strname=self.Slotting(strname,EBL2,PanelBasics,BandingCodingDict,panel,m,QRCode,Face,IdFile,CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '左' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                                                t,strname=self.Slotting(strname, EBL2, PanelBasics, BandingCodingDict, panel, m, QRCode, Face, IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                        elif X > EndX or Y > EndY:
-                                            if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                                                t,strname=self.Slotting(strname, EBL2, PanelBasics, BandingCodingDict, panel, m, QRCode, Face, IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '右' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                                                t,strname=self.Slotting(strname, EBL2, PanelBasics, BandingCodingDict, panel, m, QRCode, Face, IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '左' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                                                t,strname=self.Slotting(strname, EBL2, PanelBasics, BandingCodingDict, panel, m, QRCode, Face, IdFile, CsvIdFileQ,CsvIdFileQL,t)
-
-                                    elif Face == 6:
-                                        # 判断走刀方向
-                                        if X < EndX or Y < EndY:
-                                            if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                                                t, strname = self.Slotting(strname,EBL2,PanelBasics,BandingCodingDict,panel,m,QRCode,Face,IdFile,CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '右' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                                                t, strname = self.Slotting(strname, EBL2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '左' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                                                t, strname = self.Slotting(strname, EBL2, PanelBasics, BandingCodingDict, panel, m, QRCode, Face, IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                        elif X > EndX or Y > EndY:
-                                            if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                                                t, strname = self.Slotting(strname, EBL2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '右' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                                                t, strname = self.Slotting(strname, EBL2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '左' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                                                t, strname = self.Slotting(strname, EBL2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-
-                                else:
-                                    continue
-                            # elif bianlian ==1:
-                            #     if (abs(EndX - X) == 0 and abs(EndY - Y) == Width):
-                            #         if Face == 5:
-                            #             # 判断走刀方向
-                            #             if X < EndX or Y < EndY:
-                            #                 if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+5面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #                 elif ToolOffset == '右' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+5面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #                 elif ToolOffset == '左' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+5面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #             elif X > EndX or Y > EndY:
-                            #                 if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+5面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #                 elif ToolOffset == '右' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+5面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #                 elif ToolOffset == '左' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+5面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #
-                            #         elif Face == 6:
-                            #             # 判断走刀方向
-                            #             if X < EndX or Y < EndY:
-                            #                 if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+6面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #                 elif ToolOffset == '右' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+6面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #                 elif ToolOffset == '左' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+6面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #             elif X > EndX or Y > EndY:
-                            #                 if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+6面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #                 elif ToolOffset == '右' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+6面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #                 elif ToolOffset == '左' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                            #                     if strname=='1.0mm封边':
-                            #                         if '▲▲▲▲' in EBL2:
-                            #                             strname = '1.0mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         elif '△△△△' in EBL2:
-                            #                             strname = '0.5mm封边'
-                            #                             PanelBasics[12]=(BandingCodingDict[EBL2.strip()])
-                            #                             t = 1
-                            #                         else:
-                            #                             strname = ''
-                            #                             t = 1
-                            #                     strname = strname + "+6面槽"
-                            #                     m.setAttribute('IsGenCode', "0")
-                            #                     ids = '1' + QRCode + str(Face)
-                            #                     IdFile.append(ids)
-                            #                     CsvIds = QRCode
-                            #                     CsvIdFile.append(CsvIds)
-                            #     else:
-                            #         continue
-                            #
-
-                            else:
-                                continue
-                        else:
-                            continue
                 strname += '+跟踪'
-            if '6面槽+5面槽' in strname:
-                strname = strname.replace('6面槽+5面槽', '5&6面槽')
-            elif '5面槽+6面槽' in strname:
-                strname = strname.replace('5面槽+6面槽', '5&6面槽')
             if '▲▲▲▲' in EBL1:
-                strname = strname+'+斜棱'
+                strname = strname+'+倒棱'
         elif i == 1:
-            t = 0
-            # if bianlian==1:
-            #     EBW1 = panel.getAttribute('EBL1')
-            #     EBW2 = panel.getAttribute('EBL2')
-            # elif bianlian==0:
             EBW1 = panel.getAttribute('EBW1')
-            EBW2 = panel.getAttribute('EBW2')
-            # EBW1 = panel.getAttribute('EBW1')
-            # EBW2 = panel.getAttribute('EBW2')
             strname = ''
             if EBW1 == "":
                 strname = '无封边'
@@ -681,81 +344,16 @@ class banding:
                     strname = '1.0mm封边'
                 elif '△△△△' in EBW1:
                     strname = '0.5mm封边'
-                Length = float(panel.getAttribute('Length'))
-                Width = float(panel.getAttribute('Width'))
-                Machines = panel.getElementsByTagName("Machines")
-                for Machining in Machines:
-                    macin = Machining.getElementsByTagName("Machining")
-                    for m in macin:
-                        Type = int(m.getAttribute('Type'))
-                        Face = int(m.getAttribute('Face'))
-                        X = float(m.getAttribute('X'))
-                        Y = float(m.getAttribute('Y'))
-                        if Type == 3:
-                            strname = strname.split('+')[0]
-                            break
-                        elif Type == 4:
-                            EndX = float(m.getAttribute('EndX'))
-                            EndY = float(m.getAttribute('EndY'))
-                            widthTool = float(m.getAttribute('Width'))
-                            ToolOffset = m.getAttribute('ToolOffset')
-                            # 判断槽宽
-                            if widthTool == 13:
-                                # 判断通槽
-                                # if bianlian ==0:
-                                if (abs(EndX - X) == 0 and abs(EndY - Y) == Width):
-                                    if Face == 5:
-                                        # 判断走刀方向
-                                        if X < EndX or Y < EndY:
-                                            if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                                                t,strname=self.Slotting(strname,EBW2,PanelBasics,BandingCodingDict,panel,m,QRCode,Face,IdFile,CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '右' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '左' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                        elif X > EndX or Y > EndY:
-                                            if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '右' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '左' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-
-                                    elif Face == 6:
-                                        # 判断走刀方向
-                                        if X < EndX or Y < EndY:
-                                            if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '右' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '左' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                        elif X > EndX or Y > EndY:
-                                            if ToolOffset == '中' and (X - widthTool / 2 == 7 or Length - X - widthTool / 2 == 7 or Y - widthTool / 2 == 7 or Width - Y - widthTool / 2 == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '右' and (X == 7 or Length - X - widthTool == 7 or Y - widthTool == 7 or Width - Y == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                            elif ToolOffset == '左' and (X - widthTool == 7 or Length - X == 7 or Y == 7 or Width - Y - widthTool == 7):
-                                                t, strname = self.Slotting(strname, EBW2, PanelBasics,BandingCodingDict, panel, m, QRCode, Face,IdFile, CsvIdFileQ,CsvIdFileQL,t)
-                                else:
-                                    continue
-
-                            else:
-                                continue
-                        else:
-                            continue
                 strname += '+跟踪'
-            if '6面槽+5面槽' in strname:
-                strname = strname.replace('6面槽+5面槽', '5&6面槽')
-            elif '5面槽+6面槽' in strname:
-                strname = strname.replace('5面槽+6面槽', '5&6面槽')
+        if floatingCutter !=2:
+            strname=strname+'+横向'
         LeftProcessingCode = ProcessingDict[strname]
-        PanelBasics.append(LeftProcessingCode)
+        PanelBasics.insert(13, LeftProcessingCode)
 
         return t
 
     # 浮动铣刀
-    def FloatingCutter(self,i,PanelBasics,FininshedLength,FinishedWidth):
+    def FloatingCutter(self,i,PanelBasics,FininshedLength,FinishedWidth,floatingCutter):
         """
 
         :param i: 第几行数据
@@ -764,20 +362,27 @@ class banding:
         :param FinishedWidth: 成品宽
         :return: 空
         """
+        milling=floatingCutter
         if i == 1 and FininshedLength>=FinishedWidth:
             milling = 0
             PanelBasics.append(milling )
         elif i == 1 and FininshedLength<FinishedWidth:
-            milling = 2
+            if FinishedWidth>=1800:
+                milling = 2
+            else:
+                milling = 0
             PanelBasics.append(milling)
         elif i == 2 and FininshedLength>=FinishedWidth:
-            milling = 2
+            if FininshedLength>=1800:
+                milling = 2
+            else:
+                milling=0
             PanelBasics.append(milling)
         elif i == 2 and FininshedLength < FinishedWidth:
             milling = 0
             PanelBasics.append(milling)
 
-        return
+        return milling
 
     # 右机封边带编码
     def RigthBandingCode(self,i, panel, PanelBasics, BandingCodingDict,Thick):
@@ -790,10 +395,6 @@ class banding:
         :return: 空
         """
         if i == 2:
-            # if bianlian == 1:
-            #     RightBandingCodeOne = panel.getAttribute('EBW2')
-            # else:
-            #     RightBandingCodeOne = panel.getAttribute('EBL2')
             RightBandingCodeOne = panel.getAttribute('EBL2')
             if RightBandingCodeOne == "":
                 RightBandingCodeOne = "无封边"
@@ -801,13 +402,8 @@ class banding:
             else:
                 RightBandingCodeOne= RightBandingCodeOne+'+'+str(int(Thick))
                 RightBandingCodeOne = BandingCodingDict[RightBandingCodeOne.strip()]
-            # RightBandingCodeOne = BandingCodingDict[RightBandingCodeOne.strip()]
             PanelBasics.append(RightBandingCodeOne)
         elif i == 1:
-            # if bianlian == 1:
-            #     RigthBandingCodeTwo = panel.getAttribute('EBL2')
-            # else:
-            #     RigthBandingCodeTwo = panel.getAttribute('EBW2')
             RigthBandingCodeTwo = panel.getAttribute('EBW2')
             if RigthBandingCodeTwo == "":
                 RigthBandingCodeTwo = "无封边"
@@ -815,13 +411,12 @@ class banding:
             else:
                 RigthBandingCodeTwo = RigthBandingCodeTwo +'+'+ str(int(Thick))
                 RigthBandingCodeTwo = BandingCodingDict[RigthBandingCodeTwo.strip()]
-            # RigthBandingCodeTwo = BandingCodingDict[RigthBandingCodeTwo.strip()]
             PanelBasics.append(RigthBandingCodeTwo)
 
         return
 
     # 右击加工编码
-    def RigthProcessCode(self,i, panel, PanelBasics, BandingCodingDict,t,ProcessingDict,CheckBoxf):
+    def RigthProcessCode(self,i, panel, PanelBasics,ProcessingDict):
         """
         右机加工编码
         :param i: 第几行数据
@@ -833,26 +428,7 @@ class banding:
         :return: RightProcessingCode 加工编码
         """
         if i == 2:
-            # if bianlian == 1:
-            #     if t == 0:
-            #         EBL2 = panel.getAttribute('EBW2')
-            #     elif t == 1:
-            #         EBL2 = panel.getAttribute('EBW1')
-            #         PanelBasics[14] = BandingCodingDict[EBL2.strip()]
-            # else:
-            #     if t == 0:
-            #         EBL2 = panel.getAttribute('EBL2')
-            #     elif t == 1:
-            #         EBL2 = panel.getAttribute('EBL1')
-            #         PanelBasics[14]=BandingCodingDict[EBL2.strip()]
-            if t == 0:
-                EBL2 = panel.getAttribute('EBL2')
-            elif t == 1:
-                EBL2 = panel.getAttribute('EBL1')
-                if CheckBoxf==True:
-                    PanelBasics[15] = BandingCodingDict[EBL2.strip()]
-                else:
-                    PanelBasics[14] = BandingCodingDict[EBL2.strip()]
+            EBL2 = panel.getAttribute('EBL2')
             strname = ''
             if EBL2 == "":
                 strname = '无封边'
@@ -863,29 +439,10 @@ class banding:
                     strname = '0.5mm封边'
                 strname += '+跟踪'
             if '▲▲▲▲' in EBL2:
-                strname +='+斜棱'
-        elif i == 1:
-            # if bianlian == 1:
-            #     if t == 0:
-            #         EBW2 = panel.getAttribute('EBL2')
-            #     elif t == 1:
-            #         EBW2 = panel.getAttribute('EBL1')
-            #         PanelBasics[14] = BandingCodingDict[EBW2.strip()]
-            # else:
-            #     if t == 0:
-            #         EBW2 = panel.getAttribute('EBW2')
-            #     elif t == 1:
-            #         EBW2 = panel.getAttribute('EBW1')
-            #         PanelBasics[14] = BandingCodingDict[EBW2.strip()]
-            if t == 0:
-                EBW2 = panel.getAttribute('EBW2')
-            elif t == 1:
-                EBW2 = panel.getAttribute('EBW1')
-                if CheckBoxf == True:
-                    PanelBasics[15] = BandingCodingDict[EBW2.strip()]
-                else:
-                    PanelBasics[14] = BandingCodingDict[EBW2.strip()]
+                strname +='+倒棱'
 
+        elif i == 1:
+            EBW2 = panel.getAttribute('EBW2')
             strname = ''
             if EBW2 == "":
                 strname = '无封边'
@@ -894,8 +451,8 @@ class banding:
                     strname = '1.0mm封边'
                 elif '△△△△' in EBW2:
                     strname = '0.5mm封边'
-
                 strname += '+跟踪'
+        strname = strname + '+横向'
         RightProcessingCode = ProcessingDict[strname]
         PanelBasics.append(RightProcessingCode)
 
@@ -945,13 +502,12 @@ class banding:
         return
 
 
-    def changeWwidth(self,Folderpath,Folderpath2,Folderpath3,Folderpath4,test,styleCell,SqlUnit,IdList,CheckBoxf):
+    def changeWwidth(self,Folderpath,Folderpath2,Folderpath3,Folderpath4,test,styleCell,SqlUnit,IdList,CheckBoxf,username):
         BandingProcessing,BandingCode = SqlUnit.selectBandingProcessingFive()
         ProcessingDict={}
         for t in BandingProcessing:
             ProcessingDict[t[1]]=t[0]
         BandingCodingDict={}
-        # BandingCode= SqlUnit.selectBandingCode()
         for t in BandingCode:
             BandingCodingDict[t[1]]=t[2]
         # 打开文件夹得到文件夹下的所有文件
@@ -970,10 +526,12 @@ class banding:
                 CsvIdFileQ = []
                 CsvIdFileQL =[]
                 CsvIdFileKc=[]
+                CsvIdFileC=[]
                 for panel in Panelnodes:
                     WorkpieceRotation=0
                     for i in range(1,3):
                         PanelBasics = []
+                        Grain = panel.getAttribute('Grain')
 
                         # 1.二维码，参考
                         QRCode=self.QRCode(panel,PanelBasics)
@@ -992,17 +550,37 @@ class banding:
 
                         # 6.完工长度
                         FinishedLength = self.FinishedLength(panel, PanelBasics)
-                        # if FinishedLength<250:
-                        #     break
+                        if FinishedLength<250:
+                            break
                         PanelBasics.append(FinishedLength)
 
 
                         # 7.完工宽度
                         FinishedWidth = self.FinishedWidth(panel, PanelBasics)
-                        # if FinishedWidth<250:
-                        #     break
+                        if FinishedWidth<250:
+                            break
                         PanelBasics.append(FinishedWidth)
 
+                        if FinishedLength>=1800 or FinishedWidth>=1800:
+                            CsvIdFileC.append(QRCode)
+
+
+                        # if i == 2:
+                        #     CsvIds = QRCode
+                        #     if FinishedLength < FinishedWidth:
+                        #         if Grain == 'L':
+                        #             panel.setAttribute('Info7', "QL")
+                        #             CsvIdFileQL.append(CsvIds)
+                        #         elif Grain == 'W':
+                        #             panel.setAttribute('Info7', "Q")
+                        #             CsvIdFileQ.append(CsvIds)
+                        #     elif FinishedLength >= FinishedWidth:
+                        #         if Grain == 'L':
+                        #             panel.setAttribute('Info7', "Q")
+                        #             CsvIdFileQ.append(CsvIds)
+                        #         elif Grain == 'W':
+                        #             panel.setAttribute('Info7', "QL")
+                        #             CsvIdFileQL.append(CsvIds)
 
                         # 8.完工厚度
                         FinishedThickness = self.Thickness(panel, PanelBasics)
@@ -1021,50 +599,55 @@ class banding:
                         # 13.左机封边带编码
                         self.LeftBandingCode(i,panel,PanelBasics,BandingCodingDict,FinishedThickness)
 
-                        # 14.左机加工编码
-                        t = self.LeftProcessCode(i,panel,PanelBasics,FinishedLength,FinishedWidth,BandingCodingDict,QRCode,IdFile,CsvIdFileKc,CsvIdFileQL,ProcessingDict)
-
                         # 15.浮动铣刀
+                        floatingCutter = 0
                         if CheckBoxf == True:
-                            self.FloatingCutter(i,PanelBasics,FinishedLength,FinishedWidth,)
+                            floatingCutter =self.FloatingCutter(i, PanelBasics, FinishedLength, FinishedWidth,floatingCutter)
+
+                        # 14.左机加工编码
+                        t = self.LeftProcessCode(i,panel,PanelBasics,ProcessingDict,floatingCutter)
+
 
                         # 16.右机封边带编码
                         self.RigthBandingCode(i,panel,PanelBasics,BandingCodingDict,FinishedThickness)
 
 
                         # 17.右机加工编码
-                        self.RigthProcessCode(i,panel,PanelBasics,BandingCodingDict,t,ProcessingDict,CheckBoxf)
+                        self.RigthProcessCode(i,panel,PanelBasics,ProcessingDict)
 
                         #18.左右机预铣
                         self.PreMilling(i,panel,PanelBasics,CheckBoxf)
 
                         PanelList.append(PanelBasics)
 
-                        if FinishedLength<FinishedWidth:
-                            panel.setAttribute('Info7', "QL")
-                            # 整数还是小数
-                            if panel.getAttribute('CutLength').isalnum():
-                                panel.setAttribute('CutLength', str(int(panel.getAttribute('CutLength')) + 1))
-                            else:
-                                panel.setAttribute('CutLength', str(float(panel.getAttribute('CutLength')) + 1))
-                            CsvIds=QRCode
-                            CsvIdFileQL.append(CsvIds)
-                        elif FinishedLength>=FinishedWidth:
-                            panel.setAttribute('Info7', "Q")
-                            if panel.getAttribute('CutWidth').isalnum():
-                                panel.setAttribute('CutWidth', str(int(panel.getAttribute('CutWidth')) +1))
-                            else:
-                                panel.setAttribute('CutWidth', str(float(panel.getAttribute('CutWidth')) + 1))
-
-                            CsvIds =QRCode
-                            CsvIdFileQ.append(CsvIds)
+                        if i == 2:
+                            if FinishedLength<FinishedWidth:
+                                panel.setAttribute('Info7', "QL")
+                                if FinishedWidth >=1800:
+                                # 整数还是小数
+                                    if panel.getAttribute('CutLength').isalnum():
+                                        panel.setAttribute('CutLength', str(int(panel.getAttribute('CutLength')) + 1))
+                                    else:
+                                        panel.setAttribute('CutLength', str(float(panel.getAttribute('CutLength')) + 1))
+                                CsvIds=QRCode
+                                CsvIdFileQL.append(CsvIds)
+                            elif FinishedLength>=FinishedWidth:
+                                panel.setAttribute('Info7', "Q")
+                                if FinishedLength >= 1800:
+                                    if panel.getAttribute('CutWidth').isalnum():
+                                        panel.setAttribute('CutWidth', str(int(panel.getAttribute('CutWidth')) + 1))
+                                    else:
+                                        panel.setAttribute('CutWidth', str(float(panel.getAttribute('CutWidth')) + 1))
+                                CsvIds =QRCode
+                                CsvIdFileQ.append(CsvIds)
                 IdList.append(IdFile)
                 # print(len(CsvIdFile))
                 # 去重
                 CsvIdFileQL = list(set(CsvIdFileQL))
                 CsvIdFileQ = list(set(CsvIdFileQ))
+                CsvIdFileC= list(set(CsvIdFileC))
                 if Folderpath4!='':
-                    self.SawCsv(CsvIdFileQ,CsvIdFileQL,CsvIdFileKc,Folderpath4,j)
+                    self.SawCsv(CsvIdFileQ,CsvIdFileQL,CsvIdFileKc,Folderpath4,j,CsvIdFileC)
 
 
                 col = ('二维码', '备注1', '备注2', '备注3', '左机预铣', '右机预铣', '完工长度', '完工宽度', '完工厚度', '数量','进给次序','工件旋转','浮动铣刀','速度','左机封边带编码','左机加工编码','右机封边带编码','右机加工编码')
@@ -1079,7 +662,7 @@ class banding:
 
                 # Csv
                 df = pd.DataFrame(PanelList)
-                print(PanelList)
+                # print(PanelList)
                 # df.columns = ['参考', '装饰', '物料流', '批号', '客户编号', '长', '宽', '厚', '数量','进给次序，通过值','速度','方向(工件旋转)','左机预铣','左机封边','左机加工','浮动铣刀','右机预铣','右机封边','右机加工']
                 if CheckBoxf == True:
                     df.columns = ['Reference', 'Decor', 'Materialflow', 'BatchNumber', 'CustomerNumber', 'Length', 'Width',
@@ -1092,10 +675,16 @@ class banding:
                 path = Folderpath2+'/'+j.split('.')[0]+'.csv'
                 # test.save(path)
                 df.to_csv(path,sep=';',index=False,header=False,encoding='gb18030')
-                print(Folderpath3)
+                # print(Folderpath3)
                 with open(Folderpath3 + "/" + fullPath.split('/')[-1], "w", encoding="UTF-8") as fs:
                     fs.write(xmldoc.toxml())
                     fs.close()
+                Inserttime = datetime.datetime.now().strftime("%Y%m%d%H%M")
+                for i in PanelList:
+                    i.insert(0, Inserttime)
+                    i.append(username)
+                #     插入数据库
+                # SqlUnit.InserUnitFive(PanelList)
                 yield j
             except:
                 logging.basicConfig(filename='log.txt', level=logging.DEBUG,
@@ -1109,15 +698,15 @@ class banding:
                 mb.alert(f"{j}文件处理失败，请联系管理员",'报错')
                 # win32api.MessageBox(0,f"{j.split('.')[0]}文件处理失败，请联系管理员","错误",win32con.MB_OK)
         # return IdList
-def main(Folderpath,Folderpath2,Folderpath3,Folderpath4,IdList,CheckBoxf):
+def main(Folderpath,Folderpath2,Folderpath3,Folderpath4,IdList,CheckBoxf,username,sqlIp,edt_username,edt_password):
     # 创建表格对象
     test = My_sheet()
     # 创建样式对象
     styleCell = style()
     #
     ban=banding()
-    SqlUnit = sqlUnit.main()
-    file = ban.changeWwidth(Folderpath,Folderpath2,Folderpath3,Folderpath4,test,styleCell,SqlUnit,IdList,CheckBoxf)
+    SqlUnit = sqlUnit.main(sqlIp,edt_username,edt_password)
+    file = ban.changeWwidth(Folderpath,Folderpath2,Folderpath3,Folderpath4,test,styleCell,SqlUnit,IdList,CheckBoxf,username)
     # sqlUnit.SqlUnit.InserUnit(PaneListNUm)
     return file,SqlUnit
 

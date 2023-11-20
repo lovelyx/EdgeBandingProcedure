@@ -5,8 +5,9 @@ import uuid
 import decimal
 
 class SqlUnit():
-    def __init__(self):
-        self.conn = pymssql.connect('192.168.10.16', 'sa', 'admin@325','HT')  # 单纯连接数据库
+    def __init__(self,sqlIp,edt_username,edt_password):
+        print(sqlIp,edt_username,edt_password)
+        self.conn = pymssql.connect(sqlIp, edt_username,edt_password ,'HT')  # 单纯连接数据库
         if self.conn:
             print("连接成功")
 
@@ -81,8 +82,38 @@ class SqlUnit():
         #     self.conn.commit()
         # VALUES( % s);' % ', '.join(params)
         # ",".join(map(str, data))
-        sql_insert = 'INSERT INTO HT_EdgeData (CreateTime,Reference,MemoOne,MemoTwo,MemoThree,CustomerNumber,Length,Width,Thickness,Quantity,passValue,FeedSpeed,Orientation,OverSizeM1,EdgeMacroLM1,ProgramM1,OverSizeM2,EdgeMacroRM2,ProgramM2,UserName) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-        print(data)
+        sql_insert = 'INSERT INTO HT_EdgeData (CreateTime,Reference,MemoOne,MemoTwo,MemoThree,CustomerNumber,Length,Width,Thickness,Quantity,passValue,FeedSpeed,Orientation,OverSizeM1,EdgeMacroLM1,ProgramM1,OverSizeM2,EdgeMacroRM2,ProgramM2,identifying,UserName) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        # print(data)
+        DataTuple=list(map(tuple, data))
+        # cursor.execute(sql_insert)
+        cursor.executemany(sql_insert,DataTuple)
+        self.conn.commit()
+        cursor.close()
+        return
+        # self.conn.close()
+
+    def InserUnitFive(self,data):
+        # CreateTime, code, MemoOne, MemoTwo, MemoThree, LeftMachine, RightMachine, Lenght, Width, Thick, Qty, FeedSequence, WorkpieceRotation, FloatingCutter, velocity, LeftEdgeCode, LeftMachiningCode, RightEdgeCode, RightMachiningCode
+
+        # 3:为这个表插入数据
+        # import  pymssql
+        # conn = pymssql.connect('.','sa','123456','PY_DATA')
+        # if conn:
+        #     print("True")
+
+        cursor = self.conn.cursor()
+        # a = "松仁、秉峰、泳纪海奉、威剑、颂和、祥益、腾恩、柏铄、孟深、忠庄、轩哲、铠鑫、仕伦、儒亿、积进信钦、贤元、程基、安泉、树昌、祝斌、一科、游湖、普济、中坚"
+        # 'Reference', 'Decor', 'Materialflow', 'BatchNumber', 'CustomerNumber', 'Length','Width', 'Thickness', 'Quantity', 'passValue', 'FeedSpeed', 'Orientation','OverSizeM1', 'EdgeMacroLM1', 'ProgramM1', 'OverSizeM2', 'EdgeMacroRM2', 'ProgramM2'
+        # a = a.split("、")
+        # for i in range(len(a)):
+        #     sql_insert = f"insert into Student Values({i},'{a[i]}',18)"
+        #     print(sql_insert)
+        #     cursor.execute(sql_insert)
+        #     self.conn.commit()
+        # VALUES( % s);' % ', '.join(params)
+        # ",".join(map(str, data))
+        sql_insert = 'INSERT INTO HT_EdgeDataFive (CreateTime,Reference,MemoOne,MemoTwo,MemoThree,CustomerNumber,Length,Width,Thickness,Quantity,passValue,FeedSpeed,Orientation,OverSizeM1,EdgeMacroLM1,ProgramM1,BasicMacroM1,OverSizeM2,EdgeMacroRM2,ProgramM2,UserName) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        # print(data)
         DataTuple=list(map(tuple, data))
         # cursor.execute(sql_insert)
         cursor.executemany(sql_insert,DataTuple)
@@ -136,14 +167,28 @@ class SqlUnit():
         cursor.execute(sql_select)
         row = cursor.fetchall()
         list = row
+
+        # sql_select = "select * from HT_BandingProcessingRight"
+        # cursor.execute(sql_select)
+        # row4 = cursor.fetchall()
+        # list4 = row4
+
         sql_select = "select * from HT_BandingCode"
         cursor.execute(sql_select)
         row2 = cursor.fetchall()
         list2=row2
+
+        # sql_select = "select * from HT_BandingCodeRight"
+        # cursor.execute(sql_select)
+        # row3 = cursor.fetchall()
+        # list3 = row3
+
         cursor.close()
         # self.conn.close()
 
-        return list,list2
+        # return list,list4,list2,list3
+
+        return list, list2
 
     def selectBandingProcessingFive(self):
         cursor=self.conn.cursor()
@@ -162,8 +207,8 @@ class SqlUnit():
 
 
 
-def main():
-    sqlUnit = SqlUnit()
+def main(sqlIp,edt_username,edt_password):
+    sqlUnit = SqlUnit(sqlIp,edt_username,edt_password)
     # sqlUnit.creatTableUnit()
     # sqlUnit.InserUnit()
 

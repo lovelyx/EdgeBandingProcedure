@@ -2,6 +2,8 @@ import base64
 import hashlib
 import sys
 
+import cryptocode
+from PyQt5.QtCore import QSettings
 from PySide2.QtWidgets import QApplication, QMessageBox
 from PySide2.QtUiTools import QUiLoader
 import foreEnd.index2 as index2
@@ -46,7 +48,18 @@ class Win_Login:
 
         password2=md5.hexdigest()
         print(password2)
-        SqlUnit = sqlUnit.main()
+
+        settings = QSettings("config.ini", QSettings.IniFormat)
+        sqlIp = settings.value("sqlIp")
+        edt_username = settings.value("edt_username")
+        edt_password = settings.value("edt_password")
+        sqlIp = cryptocode.decrypt(sqlIp, "kfht.")
+        edt_username = cryptocode.decrypt(edt_username, "kfht.")
+        edt_password = cryptocode.decrypt(edt_password, "kfht.")
+        print(f'sqlIp:{sqlIp}')
+        print(f'edt_password:{edt_password}')
+
+        SqlUnit = sqlUnit.main(sqlIp,edt_username,edt_password)
         re=SqlUnit.selectUnit(username,password2)
         # re=True
         # re = sqlUnit.selectUnit(username, password)
