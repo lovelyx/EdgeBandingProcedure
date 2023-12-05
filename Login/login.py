@@ -8,6 +8,7 @@ from PySide2.QtWidgets import QApplication, QMessageBox
 from PySide2.QtUiTools import QUiLoader
 import foreEnd.index2 as index2
 import foreEnd.index as index
+import foreEnd.UpdateVersion as update
 
 from lib.share import SI
 import lib.Sql as sqlUnit
@@ -64,7 +65,10 @@ class Win_Login:
         # re=True
         # re = sqlUnit.selectUnit(username, password)
         if re:
-            index.index(username)
+            if update.ObtainVersion():
+                print('下载ftp')
+            else:
+                index.index(username)
         else:
             QMessageBox.warning(
                 self.ui,
