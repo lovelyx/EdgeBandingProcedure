@@ -66,7 +66,11 @@ class Win_Login:
         # re = sqlUnit.selectUnit(username, password)
         if re:
             if update.ObtainVersion():
-                print('下载ftp')
+                choice = QMessageBox.question(self.ui, '更新', '发现新的版本是否更新？')
+                if choice == QMessageBox.Yes:
+                    update.main()
+                elif choice == QMessageBox.No:
+                    index.index(username)
             else:
                 index.index(username)
         else:
