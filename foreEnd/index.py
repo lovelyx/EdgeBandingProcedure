@@ -18,6 +18,7 @@ import afterEnd.Shield as shield
 import afterEnd.compress as zip
 import foreEnd.SqlSet as sqlset
 import afterEnd.MprProcessing as Mpr
+import afterEnd.statistics as statistics
 
 from lib.share import SI
 import os
@@ -37,6 +38,7 @@ class Win_Main():
         self.ui.Buttonbanding.clicked.connect(self.BandingExt)
         self.ui.Buttonbanding2.clicked.connect(self.BandingExtFive)
         self.ui.MprProcessing.clicked.connect(self.MprProcessing)
+        self.ui.pushButton.clicked.connect(self.statistics)
         self.ui.sqlActionc.triggered.connect(self.sqlActionc)
         # self.ui.ButtonAvailability.clicked.connect(self.Availability)
         self.ui.VersionAction.triggered.connect(self.about)
@@ -55,7 +57,7 @@ class Win_Main():
         QMessageBox.about(
             self.ui,
             '版本信息',
-            '后台封边程序工具V4.2.3\n2023.11.17')
+            '后台封边程序工具V4.2.3\n2023.12.05')
 
     def PatchSignIn(self):
         PachIndex.main()
@@ -103,6 +105,7 @@ class Win_Main():
         self.ui.Buttonbanding.setEnabled(False)
         self.ui.Buttonbanding2.setEnabled(False)
         self.ui.MprProcessing.setEnabled(False)
+        self.ui.pushButton.setEnabled(False)
         self.ui.textBrowser.append('开始处理')
         def run():
             self.deletefile(XmlOutput)
@@ -126,6 +129,7 @@ class Win_Main():
             self.ui.Buttonbanding.setEnabled(True)
             self.ui.Buttonbanding2.setEnabled(True)
             self.ui.MprProcessing.setEnabled(True)
+            self.ui.pushButton.setEnabled(True)
 
 
             SqlUnit.conn.close()
@@ -178,6 +182,7 @@ class Win_Main():
         self.ui.Buttonbanding.setEnabled(False)
         self.ui.Buttonbanding2.setEnabled(False)
         self.ui.MprProcessing.setEnabled(False)
+        self.ui.pushButton.setEnabled(False)
         self.ui.textBrowser.append('开始处理')
 
         def run():
@@ -200,6 +205,7 @@ class Win_Main():
             self.ui.Buttonbanding.setEnabled(True)
             self.ui.Buttonbanding2.setEnabled(True)
             self.ui.MprProcessing.setEnabled(True)
+            self.ui.pushButton.setEnabled(True)
 
             SqlUnit.conn.close()
             print('关闭成功')
@@ -231,6 +237,7 @@ class Win_Main():
         self.ui.Buttonbanding.setEnabled(False)
         self.ui.Buttonbanding2.setEnabled(False)
         self.ui.MprProcessing.setEnabled(False)
+        self.ui.pushButton.setEnabled(False)
         self.ui.textBrowser.append('开始处理')
         def run():
             # self.deletefile(XmlOutput)
@@ -245,6 +252,52 @@ class Win_Main():
             self.ui.Buttonbanding.setEnabled(True)
             self.ui.Buttonbanding2.setEnabled(True)
             self.ui.MprProcessing.setEnabled(True)
+            self.ui.pushButton.setEnabled(True)
+
+        # 多线程运行
+        t = Thread(target=run)
+        t.setDaemon(True)
+        t.start()
+
+    def statistics(self):
+        settings = QSettings("config.ini", QSettings.IniFormat)
+        XmlInput = settings.value("XmlInput")
+        MprInput = settings.value("MprInput")
+        CsvOutput = settings.value("CsvOutput")
+        XmlOutput = settings.value("XmlOutput")
+        MprOutput = settings.value("MprOutput")
+        SawCsvOutput = settings.value("SawCsvOutput")
+        CheckBoxf = settings.value("CheckBoxf")
+        sqlIp = settings.value("sqlIp")
+        edt_username = settings.value("edt_username")
+        edt_password = settings.value("edt_password")
+        sqlIp = cryptocode.decrypt(sqlIp, "kfht.")
+        edt_username = cryptocode.decrypt(edt_username, "kfht.")
+        edt_password = cryptocode.decrypt(edt_password, "kfht.")
+
+        IdList = []
+        IdDictNo = {}
+        # 按钮禁用
+        self.ui.Buttonbanding.setEnabled(False)
+        self.ui.Buttonbanding2.setEnabled(False)
+        self.ui.MprProcessing.setEnabled(False)
+        self.ui.pushButton.setEnabled(False)
+        self.ui.textBrowser.append('开始处理')
+
+        def run():
+            # self.deletefile(XmlOutput)
+            # self.deletefile(MprOutput)
+
+            self.ui.textBrowser.append(f'正在统计,请稍后.........')
+            self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
+            statistics.main(XmlOutput)
+            print("mpr处理完成")
+            self.ui.textBrowser.append(f'统计完成')
+            self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
+            self.ui.Buttonbanding.setEnabled(True)
+            self.ui.Buttonbanding2.setEnabled(True)
+            self.ui.MprProcessing.setEnabled(True)
+            self.ui.pushButton.setEnabled(True)
 
         # 多线程运行
         t = Thread(target=run)

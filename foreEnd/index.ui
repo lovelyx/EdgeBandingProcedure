@@ -24,6 +24,13 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>统计</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="MprProcessing">
           <property name="text">
            <string>Mpr处理</string>
