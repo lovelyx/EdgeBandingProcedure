@@ -2,13 +2,9 @@ import shutil
 import time
 import cryptocode
 
-from PyQt5.QtWidgets import QAction, qApp
-from PySide2 import QtCore
-from PySide2.QtAxContainer import QAxWidget
 from PySide2.QtCore import QSettings
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QMessageBox
-from PySide2 import QtGui
 
 
 import foreEnd.PatchSetting as PachIndex

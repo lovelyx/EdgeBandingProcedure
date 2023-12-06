@@ -65,13 +65,6 @@ class Win_Login:
         # re=True
         # re = sqlUnit.selectUnit(username, password)
         if re:
-            # if update.ObtainVersion():
-            #     choice = QMessageBox.question(self.ui, '更新', '发现新的版本是否更新？')
-            #     if choice == QMessageBox.Yes:
-            #         update.main()
-            #     elif choice == QMessageBox.No:
-            #         index.index(username)
-            # else:
             index.index(username)
         else:
             QMessageBox.warning(
