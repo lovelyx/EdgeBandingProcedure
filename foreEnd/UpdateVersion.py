@@ -2,12 +2,15 @@ import ftplib
 import os
 import re
 import shutil
+import subprocess
+import sys
 import textwrap
 import tkinter.messagebox
 import zipfile
 from time import sleep
 
 from PySide2.QtUiTools import QUiLoader
+from PySide2.QtWidgets import QMessageBox
 
 from lib.share import SI
 
@@ -93,6 +96,15 @@ class Update:
         # 睡眠一秒，方便看到进度条加载样式
         sleep(1)
         self.ui.textBrowser.append("更新完成")
+        choice = QMessageBox.question(self.ui, '更新完成', '是否重启？')
+        if choice == QMessageBox.Yes:
+            subprocess.call("updater.bat")
+            sleep(6)
+            sys.exit()
+        elif choice == QMessageBox.No:
+            sys.exit()
+
+
 
 
     def dowVersion(self):
@@ -123,8 +135,12 @@ class Update:
         print(f'extract file: {file}')
 
     def make_updater_bat(self):
+        pattern = re.compile("Version_(.*?).txt")
+        files = os.listdir('.')
+        LocalVersion = [file for file in files if 'Version' in file][0]
+        LocalVersion = pattern.findall(LocalVersion)[0]
         app_name = 'EdgeBanding.exe'
-        app_file = os.path.join('EdgeBanding123', app_name)
+        app_file = os.path.join('EdgeBanding', app_name)
         print(app_file)
         with open('updater.bat', 'w', encoding='utf-8') as updater:
             updater.write(textwrap.dedent(f'''\
@@ -135,7 +151,8 @@ class Update:
             del EdgeBanding.exe
             copy EdgeBanding\EdgeBanding.exe . /Y
             del EdgeBanding.zip
-            del Version_4.1.1.txt
+            rd /S /Q EdgeBanding
+            del Version_{LocalVersion}.txt
             echo 更新完成，等待自动启动EdgeBanding.exe...
             ping -n 3 127.0.0.1 > nul
             start EdgeBanding.exe
@@ -146,10 +163,12 @@ class Update:
     def do_replace_files(self):
         extract_dir = 'EdgeBanding'
         for file in os.listdir(extract_dir):
-            if not file.endswith('EdgeBanding.exe'):
+            if not file.endswith('EdgeBanding.exe') and not file.endswith('EdgeBanding') and not file.endswith('Cryptodome') and not file.endswith('numpy')\
+                    and not file.endswith('pandas') and not file.endswith('.dll') and not file.endswith('pyexpat.pyd') and not file.endswith('pymssql') and not file.endswith('PyQt5')\
+                    and not file.endswith('PySide2') and not file.endswith('select.pyd') and not file.endswith('shiboken2') and not file.endswith('unicodedata.pyd') and not file.endswith('_bz2.pyd'):
                 try:
                     print(f'替换文件：{file}')
-                    self.copy_files(os.path.join(extract_dir, file), './EdgeBanding123')
+                    self.copy_files(os.path.join(extract_dir, file), '.')
                 except BaseException as e:
                     if os.path.isdir(file):
                         tkinter.messagebox.showwarning(title='错误',
@@ -172,7 +191,6 @@ class Update:
 
 
 def ObtainVersion():
-# if __name__ == '__main__':
     ftp = FtpUtil('192.168.10.16','HT','admin@325')
     FtpVersion = ftp.ObtainVersion()
 
@@ -183,9 +201,6 @@ def ObtainVersion():
     files = os.listdir('./')
     LocalVersion = [file for file in files if 'Version' in file][0]
     LocalVersion = pattern.findall(LocalVersion)[0]
-
-    print(FtpVersion)
-    print(LocalVersion)
 
     if FtpVersion == LocalVersion:
         return False
