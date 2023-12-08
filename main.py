@@ -24,6 +24,7 @@ def LocalVersion():
     first_line = file.readline()
     # 关闭文件
     file.close()
+    os.remove('Version.txt')
     # 输出第一行内容
     return first_line
 
