@@ -46,23 +46,23 @@ class banding:
             if i.split('N')[1] in CsvIdFileQ:
                 df.loc[index, '301'] = 'Q'
                 df.loc[index, 'info7'] = 'Q'
-                if i.split('N')[1] in CsvIdFileC:
-                    length = df.loc[index,'开料长']
-                    width = df.loc[index, '开料宽']
-                    if float(length)>float(width):
-                        df.loc[index, '开料宽'] = float(df.loc[index, '开料宽']) + 1
-                    elif float(length)<float(width):
-                        df.loc[index, '开料长'] = float(df.loc[index, '开料长']) + 1
+                # if i.split('N')[1] in CsvIdFileC:
+                #     length = df.loc[index,'开料长']
+                #     width = df.loc[index, '开料宽']
+                #     if float(length)>float(width):
+                #         df.loc[index, '开料宽'] = float(df.loc[index, '开料宽']) + 1
+                #     elif float(length)<float(width):
+                #         df.loc[index, '开料长'] = float(df.loc[index, '开料长']) + 1
             elif i.split('N')[1] in CsvIdFileQL:
                 df.loc[index, '301'] = 'QL'
                 df.loc[index, 'info7'] = 'QL'
-                if i.split('N')[1] in CsvIdFileC:
-                    length = df.loc[index, '开料长']
-                    width = df.loc[index, '开料宽']
-                    if float(length) > float(width):
-                        df.loc[index, '开料宽'] = float(df.loc[index, '开料宽']) + 1
-                    elif float(length) < float(width):
-                        df.loc[index, '开料长'] = float(df.loc[index, '开料长']) + 1
+                # if i.split('N')[1] in CsvIdFileC:
+                #     length = df.loc[index, '开料长']
+                #     width = df.loc[index, '开料宽']
+                #     if float(length) > float(width):
+                #         df.loc[index, '开料宽'] = float(df.loc[index, '开料宽']) + 1
+                #     elif float(length) < float(width):
+                #         df.loc[index, '开料长'] = float(df.loc[index, '开料长']) + 1
         df.to_csv(fullPath, index=False,encoding='gb18030')
 
         return
@@ -261,46 +261,6 @@ class banding:
 
         return
 
-
-    # 满足开槽
-    def Slotting(self,strname,EB2,PanelBasics,BandingCodingDict,panel,m,QRCode,Face,IdFile,CsvIdFileKc,CsvIdFileQL,t):
-        """
-        满足为标准槽时执行的函数
-        :param strname: 保存封边厚薄的变量
-        :param EB2: 当前行的封边信息
-        :param PanelBasics: 存放当前行数据的数组
-        :param BandingCodingDict: 从数据库中获取的编码对照字典
-        :param panel: xml中的panel标签
-        :param m: xml中的Machining标签
-        :param QRCode: 二维码
-        :param Face: 加工面
-        :param IdFile: 存放二维码，与mpr文件配对
-        :param CsvIdFileKc: 存放二维码，与csv中的数据进行配对
-        :param t: 控制存在两边为一薄一厚时，厚边在右机加工变量
-        :return: t,strname
-        """
-        if strname == '1.0mm封边':
-            if '▲▲▲▲' in EB2:
-                strname = '1.0mm封边'
-                PanelBasics[12] = (BandingCodingDict[EB2.strip()])
-                t = 1
-            elif '△△△△' in EB2:
-                strname = '0.5mm封边'
-                PanelBasics[12] = (BandingCodingDict[EB2.strip()])
-                t = 1
-            else:
-                strname = ''
-                t = 1
-
-        strname = strname + f"+{Face}面槽"
-        if panel.getAttribute('Info6') == 'AC':
-            panel.setAttribute('Info6', "A")
-        m.setAttribute('IsGenCode', "0")
-        ids = '1' + QRCode + str(Face)
-        IdFile.append(ids)
-        CsvIdFileKc.append(QRCode)
-        return t,strname
-
     # 左机加工编码
     def LeftProcessCode(self,i, panel, PanelBasics,ProcessingDict,floatingCutter):
         """
@@ -362,25 +322,27 @@ class banding:
         :param FinishedWidth: 成品宽
         :return: 空
         """
-        milling=floatingCutter
-        if i == 1 and FininshedLength>=FinishedWidth:
-            milling = 0
-            PanelBasics.append(milling )
-        elif i == 1 and FininshedLength<FinishedWidth:
-            if FinishedWidth>=1800:
-                milling = 2
-            else:
-                milling = 0
-            PanelBasics.append(milling)
-        elif i == 2 and FininshedLength>=FinishedWidth:
-            if FininshedLength>=1800:
-                milling = 2
-            else:
-                milling=0
-            PanelBasics.append(milling)
-        elif i == 2 and FininshedLength < FinishedWidth:
-            milling = 0
-            PanelBasics.append(milling)
+        # milling=floatingCutter
+        # if i == 1 and FininshedLength>=FinishedWidth:
+        #     milling = 0
+        #     PanelBasics.append(milling )
+        # elif i == 1 and FininshedLength<FinishedWidth:
+        #     if FinishedWidth>=1800:
+        #         milling = 2
+        #     else:
+        #         milling = 0
+        #     PanelBasics.append(milling)
+        # elif i == 2 and FininshedLength>=FinishedWidth:
+        #     if FininshedLength>=1800:
+        #         milling = 2
+        #     else:
+        #         milling=0
+        #     PanelBasics.append(milling)
+        # elif i == 2 and FininshedLength < FinishedWidth:
+        #     milling = 0
+        #     PanelBasics.append(milling)
+        milling=0
+        PanelBasics.append(milling)
 
         return milling
 
@@ -474,26 +436,30 @@ class banding:
                 Faces = Edge.getAttribute('Face')
                 if i == 1:
                     if int(Faces) == 1:
-                        Pre_MillingLeft = float(Edge.getAttribute('Pre_Milling'))
+                        # Pre_MillingLeft = float(Edge.getAttribute('Pre_Milling'))
+                        Pre_MillingLeft = 0.5
                         if CheckBoxf==True:
                             PanelBasics.insert(12, Pre_MillingLeft)
                         else:
                             PanelBasics.insert(12, Pre_MillingLeft)
                     if int(Faces) == 2:
-                        Pre_MillingRigth = float(Edge.getAttribute('Pre_Milling'))
+                        # Pre_MillingRigth = float(Edge.getAttribute('Pre_Milling'))
+                        Pre_MillingRigth = 0.5
                         if CheckBoxf == True:
                             PanelBasics.insert(16, Pre_MillingRigth)
                         else:
                             PanelBasics.insert(15, Pre_MillingRigth)
                 elif i == 2:
                     if int(Faces) == 3:
-                        Pre_MillingLeft = float(Edge.getAttribute('Pre_Milling'))
+                        # Pre_MillingLeft = float(Edge.getAttribute('Pre_Milling'))
+                        Pre_MillingLeft = 0.5
                         if CheckBoxf == True:
                             PanelBasics.insert(12, Pre_MillingLeft)
                         else:
                             PanelBasics.insert(12, Pre_MillingLeft)
                     if int(Faces) == 4:
-                        Pre_MillingRigth = float(Edge.getAttribute('Pre_Milling'))
+                        # Pre_MillingRigth = float(Edge.getAttribute('Pre_Milling'))
+                        Pre_MillingRigth = 0.5
                         if CheckBoxf == True:
                             PanelBasics.insert(16, Pre_MillingRigth)
                         else:
@@ -560,27 +526,8 @@ class banding:
                         if FinishedWidth<250:
                             break
                         PanelBasics.append(FinishedWidth)
-
-                        if FinishedLength>=1800 or FinishedWidth>=1800:
-                            CsvIdFileC.append(QRCode)
-
-
-                        # if i == 2:
-                        #     CsvIds = QRCode
-                        #     if FinishedLength < FinishedWidth:
-                        #         if Grain == 'L':
-                        #             panel.setAttribute('Info7', "QL")
-                        #             CsvIdFileQL.append(CsvIds)
-                        #         elif Grain == 'W':
-                        #             panel.setAttribute('Info7', "Q")
-                        #             CsvIdFileQ.append(CsvIds)
-                        #     elif FinishedLength >= FinishedWidth:
-                        #         if Grain == 'L':
-                        #             panel.setAttribute('Info7', "Q")
-                        #             CsvIdFileQ.append(CsvIds)
-                        #         elif Grain == 'W':
-                        #             panel.setAttribute('Info7', "QL")
-                        #             CsvIdFileQL.append(CsvIds)
+                        # if FinishedLength>=1800 or FinishedWidth>=1800:
+                        #     CsvIdFileC.append(QRCode)
 
                         # 8.完工厚度
                         FinishedThickness = self.Thickness(panel, PanelBasics)
@@ -623,46 +570,34 @@ class banding:
                         if i == 2:
                             if FinishedLength<FinishedWidth:
                                 panel.setAttribute('Info7', "QL")
-                                if FinishedWidth >=1800:
-                                # 整数还是小数
-                                    if panel.getAttribute('CutLength').isalnum():
-                                        panel.setAttribute('CutLength', str(int(panel.getAttribute('CutLength')) + 1))
-                                    else:
-                                        panel.setAttribute('CutLength', str(float(panel.getAttribute('CutLength')) + 1))
+                                # if FinishedWidth >=1800:
+                                # # 整数还是小数
+                                #     if panel.getAttribute('CutLength').isalnum():
+                                #         panel.setAttribute('CutLength', str(int(panel.getAttribute('CutLength')) + 1))
+                                #     else:
+                                #         panel.setAttribute('CutLength', str(float(panel.getAttribute('CutLength')) + 1))
                                 CsvIds=QRCode
                                 CsvIdFileQL.append(CsvIds)
                             elif FinishedLength>=FinishedWidth:
                                 panel.setAttribute('Info7', "Q")
-                                if FinishedLength >= 1800:
-                                    if panel.getAttribute('CutWidth').isalnum():
-                                        panel.setAttribute('CutWidth', str(int(panel.getAttribute('CutWidth')) + 1))
-                                    else:
-                                        panel.setAttribute('CutWidth', str(float(panel.getAttribute('CutWidth')) + 1))
+                                # if FinishedLength >= 1800:
+                                #     if panel.getAttribute('CutWidth').isalnum():
+                                #         panel.setAttribute('CutWidth', str(int(panel.getAttribute('CutWidth')) + 1))
+                                #     else:
+                                #         panel.setAttribute('CutWidth', str(float(panel.getAttribute('CutWidth')) + 1))
                                 CsvIds =QRCode
                                 CsvIdFileQ.append(CsvIds)
                 IdList.append(IdFile)
-                # print(len(CsvIdFile))
                 # 去重
                 CsvIdFileQL = list(set(CsvIdFileQL))
                 CsvIdFileQ = list(set(CsvIdFileQ))
-                CsvIdFileC= list(set(CsvIdFileC))
-                if Folderpath4!='':
+                CsvIdFileC = list(set(CsvIdFileC))
+                if Folderpath4 != '':
                     self.SawCsv(CsvIdFileQ,CsvIdFileQL,CsvIdFileKc,Folderpath4,j,CsvIdFileC)
-
-
-                col = ('二维码', '备注1', '备注2', '备注3', '左机预铣', '右机预铣', '完工长度', '完工宽度', '完工厚度', '数量','进给次序','工件旋转','浮动铣刀','速度','左机封边带编码','左机加工编码','右机封边带编码','右机加工编码')
-                # Excel
-                # 写入标题
-                # test.write_row(0, 0, col,styleCell.style1())
-                # 写入数据
-                # test.write_rows(1, 0, PanelList,styleCell.style0())
-                # SqlUnit.InserUnit(PanelList)
-                # 保存按原文件命名  "D:/{}月余料利用率.xls".format(time)
 
 
                 # Csv
                 df = pd.DataFrame(PanelList)
-                # print(PanelList)
                 # df.columns = ['参考', '装饰', '物料流', '批号', '客户编号', '长', '宽', '厚', '数量','进给次序，通过值','速度','方向(工件旋转)','左机预铣','左机封边','左机加工','浮动铣刀','右机预铣','右机封边','右机加工']
                 if CheckBoxf == True:
                     df.columns = ['Reference', 'Decor', 'Materialflow', 'BatchNumber', 'CustomerNumber', 'Length', 'Width',
@@ -673,9 +608,7 @@ class banding:
 
 
                 path = Folderpath2+'/'+j.split('.')[0]+'.csv'
-                # test.save(path)
                 df.to_csv(path,sep=';',index=False,header=False,encoding='gb18030')
-                # print(Folderpath3)
                 with open(Folderpath3 + "/" + fullPath.split('/')[-1], "w", encoding="UTF-8") as fs:
                     fs.write(xmldoc.toxml())
                     fs.close()
@@ -684,7 +617,7 @@ class banding:
                     i.insert(0, Inserttime)
                     i.append(username)
                 #     插入数据库
-                # SqlUnit.InserUnitFive(PanelList)
+                SqlUnit.InserUnitFive(PanelList)
                 yield j
             except:
                 logging.basicConfig(filename='log.txt', level=logging.DEBUG,

@@ -65,7 +65,8 @@ class Win_Login:
         # re=True
         # re = sqlUnit.selectUnit(username, password)
         if re:
-            index.index(username)
+            # print(re[2].encode('latin1').decode('gbk'))
+            index.index(re[0],re[2])
         else:
             QMessageBox.warning(
                 self.ui,

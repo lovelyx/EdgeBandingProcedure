@@ -144,15 +144,16 @@ class SqlUnit():
         # if conn:
         #     print("True")
         cursor = self.conn.cursor()
-        sql_select = f"Select  * From HT_User where username = '{username}' and password ='{password}'"
+        sql_select = f"Select * From HT_User where username = '{username}' and password ='{password}'"
         print(sql_select)
         cursor.execute(sql_select)
         re = cursor.fetchone()
+        print(re)
 
-        if re == None:
-            re = False
-        elif re != '':
-            re=True
+        # if re == None:
+        #     re = False
+        # elif re != '':
+        #     re=True
 
 
         cursor.close()

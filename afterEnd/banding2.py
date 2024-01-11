@@ -20,7 +20,7 @@ class banding:
         self.changeWwidth
 
     # 修改csv文件堆垛
-    def SawCsv(self,CsvIdFileQ,CsvIdFileQL,CsvIdFileKc,path,file,CsvIdFileKcFive,CsvIdFileKcSix,CsvIdFileA,CsvIdFileT):
+    def SawCsv(self,CsvIdFileQ,CsvIdFileQL,CsvIdFileKc,path,file,CsvIdFileKcFive,CsvIdFileKcSix,CsvIdFileA,CsvIdFileT,CsvIdFileD):
         """
         处理满足条件的csv中的堆垛信息
         :param CsvIdFile: 保存满足条件的二维码+
@@ -59,6 +59,9 @@ class banding:
                 df.loc[index, '堆垛'] = 'A'
                 df.loc[index, 'info6'] = 'A'
             if i.split('N')[1] in CsvIdFileT:
+                df.loc[index, '堆垛'] = 'D'
+                df.loc[index, 'info6'] = 'D'
+            if i.split('N')[1] in CsvIdFileD:
                 df.loc[index, '堆垛'] = 'D'
                 df.loc[index, 'info6'] = 'D'
         df.to_csv(fullPath, index=False,encoding='gb18030')
@@ -1394,6 +1397,7 @@ class banding:
                 CsvIdFileKcFive = []
                 CsvIdFileKcSix = []
                 CsvIdFileA=[]
+                CsvIdFileD = []
                 CsvIdFileT = []
 
                 # 存入数据库
@@ -1523,6 +1527,10 @@ class banding:
                                     macin = Machining.getElementsByTagName("Machining")
                                     for index, q in enumerate(macin):
 
+                                        # if int(q.getAttribute('Type'))==4 and float(q.getAttribute('Width')) !=13:
+                                        #     panel.setAttribute('Info6', "D")
+                                        #     CsvIdFileD.append(QRCode)
+
                                         if q.getAttribute('Face') == '1' or q.getAttribute('Face') == '2':
                                             FaceOne = 1
 
@@ -1597,8 +1605,9 @@ class banding:
                 CsvIdFileQ = list(set(CsvIdFileQ))
                 CsvIdFileA=list(set(CsvIdFileA))
                 CsvIdFileT = list(set(CsvIdFileT))
+                CsvIdFileD=list(set(CsvIdFileD))
                 if Folderpath4!='':
-                    self.SawCsv(CsvIdFileQ,CsvIdFileQL,CsvIdFileKc,Folderpath4,j,CsvIdFileKcFive,CsvIdFileKcSix,CsvIdFileA,CsvIdFileT)
+                    self.SawCsv(CsvIdFileQ,CsvIdFileQL,CsvIdFileKc,Folderpath4,j,CsvIdFileKcFive,CsvIdFileKcSix,CsvIdFileA,CsvIdFileT,CsvIdFileD)
 
 
                 col = ('二维码', '备注1', '备注2', '备注3', '左机预铣', '右机预铣', '完工长度', '完工宽度', '完工厚度', '数量','进给次序','工件旋转','浮动铣刀','速度','左机封边带编码','左机加工编码','右机封边带编码','右机加工编码')
@@ -1634,7 +1643,7 @@ class banding:
                     i.insert(0,Inserttime)
                     i.append(username)
                 #     插入数据库
-                print(PanelListSql)
+                # print(PanelListSql)
                 print(len(PanelListSql))
                 SqlUnit.InserUnit(PanelListSql)
                 yield j

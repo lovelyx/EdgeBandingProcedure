@@ -59,7 +59,10 @@ def main(XmlOutput):
         panel.append(num)
         panel.append("{:.2f}%".format((num / sum)*100))
         panel.append(CNum)
-        panel.append("{:.2f}%".format((CNum / num)*100))
+        if num ==0:
+            panel.append(0)
+        else:
+            panel.append("{:.2f}%".format((CNum / num)*100))
         PanelList.append(panel)
         # PanelList.append(wujgnum)
     df = pd.DataFrame(PanelList)

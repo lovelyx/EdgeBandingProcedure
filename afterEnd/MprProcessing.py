@@ -19,9 +19,10 @@ def main(MprInput,MprOutput):
                         for line in fr:
                             if line.startswith('<131 \\UfluBohr\\'):
                                 line = line.replace('<131 \\UfluBohr\\','<102\\ Vertical Drilling\\')
+
+                            if line.startswith("<105 \\Konturfraesen\\"):
+                                line = line + 'EN="0"\n'
                             fw.write(line)
-
-
         return True
 
     except:
