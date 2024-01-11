@@ -5,20 +5,21 @@ import traceback
 import pymsgbox as mb
 
 
-def main(MprInput,MprOutput):
+def main(MprInput, MprOutput):
+    # noinspection PyBroadException
     try:
         for root, dirs, files in os.walk(MprInput):
             for i in files:
                 path = os.path.join(root, i)
                 with open(path) as fr:
-                    filepatch = MprOutput + "/" + path.split('\\')[-2] +"/" +path.split('\\')[-1]
-                    filepatch2 = MprOutput + "/" + path.split('\\')[-2]
-                    pathlib.Path(filepatch2).mkdir(parents=True, exist_ok=True)
-                    with open(filepatch, 'w') as fw:
+                    FilePath = MprOutput + "/" + path.split('\\')[-2] + "/" + path.split('\\')[-1]
+                    FilePath2 = MprOutput + "/" + path.split('\\')[-2]
+                    pathlib.Path(FilePath2).mkdir(parents=True, exist_ok=True)
+                    with open(FilePath, 'w') as fw:
                         # 循环读取文件内容，逐行修改
                         for line in fr:
                             if line.startswith('<131 \\UfluBohr\\'):
-                                line = line.replace('<131 \\UfluBohr\\','<102\\ Vertical Drilling\\')
+                                line = line.replace('<131 \\UfluBohr\\', '<102\\ Vertical Drilling\\')
 
                             if line.startswith("<105 \\Konturfraesen\\"):
                                 line = line + 'EN="0"\n'
@@ -27,7 +28,7 @@ def main(MprInput,MprOutput):
 
     except:
         logging.basicConfig(filename='log.txt', level=logging.DEBUG,
-                            format='%(asctime)s - %(levelname)s - %(message)s')
+                            format='%(ascTime)s - %(levelName)s - %(message)s')
         # 方案一，自己定义一个文件，自己把错误堆栈信息写入文件。
         errorFile = open('log.txt', 'a')
         errorFile.write(traceback.format_exc())

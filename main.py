@@ -1,5 +1,4 @@
 import os
-import re
 import subprocess
 import tkinter as tk
 from tkinter import messagebox
@@ -12,12 +11,13 @@ import sys
 
 sys.path.append("path")
 
+
 def LocalVersion():
     url = 'http://192.168.10.16:220/Version.txt'
     file = 'Version.txt'
-    response = requests.get(url)
+    responses = requests.get(url)
     with open(file, 'wb') as f:
-        f.write(response.content)
+        f.write(responses.content)
     # 打开文本文件
     file = open(f"Version.txt", "r")
     # 读取第一行
@@ -28,16 +28,18 @@ def LocalVersion():
     # 输出第一行内容
     return first_line
 
+
 def ResponseVersion():
     settings = QSettings("config.ini", QSettings.IniFormat)
     version = settings.value("version")
     return version
 
+
 if __name__ == '__main__':
     root = tk.Tk()
     root.withdraw()
     response = LocalVersion()
-    response =response.replace("\n", "")
+    response = response.replace("\n", "")
     local = ResponseVersion()
     if response == local:
         login.main()
@@ -48,4 +50,3 @@ if __name__ == '__main__':
             sys.exit()
         else:
             login.main()
-

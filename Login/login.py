@@ -1,4 +1,4 @@
-import base64
+
 import hashlib
 import sys
 
@@ -6,14 +6,13 @@ import cryptocode
 from PyQt5.QtCore import QSettings
 from PySide2.QtWidgets import QApplication, QMessageBox
 from PySide2.QtUiTools import QUiLoader
-import foreEnd.index2 as index2
 import foreEnd.index as index
-import foreEnd.UpdateVersion as update
 
 from lib.share import SI
 import lib.Sql as sqlUnit
 
 import os
+
 
 class Win_Login:
 
@@ -34,20 +33,13 @@ class Win_Login:
         username = self.ui.edt_username.text().strip()
         password = self.ui.edt_password.text().strip()
 
-        # re=sqlUnit.SqlUnit.selectUnit(sqlUnit.SqlUnit, username, password)
-        # 加密 base64
-        # password2 = 'kfht'+password
-        # password2 = password2.encode("utf-8")
-        # password2 = base64.b64encode(password2)
-        # password2 = base64.b64encode(password2)
-        # password2=password2.decode("utf-8")
         # 加密md5
-        md5=hashlib.md5()
-        password='kfht.'+password
-        password=str(password).encode(encoding="utf-8")
+        md5 = hashlib.md5()
+        password = 'kfht.'+password
+        password = str(password).encode(encoding="utf-8")
         md5.update(password)
 
-        password2=md5.hexdigest()
+        password2 = md5.hexdigest()
         print(password2)
 
         settings = QSettings("config.ini", QSettings.IniFormat)
@@ -60,46 +52,20 @@ class Win_Login:
         print(f'sqlIp:{sqlIp}')
         print(f'edt_password:{edt_password}')
 
-        SqlUnit = sqlUnit.main(sqlIp,edt_username,edt_password)
-        re=SqlUnit.selectUnit(username,password2)
+        SqlUnit = sqlUnit.main(sqlIp, edt_username, edt_password)
+        re = SqlUnit.selectUnit(username, password2)
         # re=True
         # re = sqlUnit.selectUnit(username, password)
         if re:
             # print(re[2].encode('latin1').decode('gbk'))
-            index.index(re[0],re[2])
+            index.index(re[0], re[2])
         else:
             QMessageBox.warning(
-                self.ui,
-                 '登录失败','请检查密码')
+                self.ui, '登录失败', '请检查密码')
             return
-
-
-        # s = requests.Session()
-        # url = "http://192.168.1.105/api/sign"
-        #
-        # res = s.post(url,json={
-        #     "action" : "signin",
-        #     "username" : username,
-        #     "password" : password
-        # })
-        #
-        # resObj = res.json()
-        # if resObj['ret'] != 0:
-        #     QMessageBox.warning(
-        #         self.ui,
-        #         '登录失败',
-        #         resObj['msg'])
-        #     return
-        # if username != '123' or password !='123':
-        #     QMessageBox.warning(
-        #                 self.ui,
-        #                  '登录失败','请检查密码')
-        #     return
-
-
-
         self.ui.edt_password.setText('')
         self.ui.hide()
+
 
 def main():
     app = QApplication([])

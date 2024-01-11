@@ -63,25 +63,8 @@ class SqlUnit():
         self.conn.close()
 
     def InserUnit(self,data):
-        # CreateTime, code, MemoOne, MemoTwo, MemoThree, LeftMachine, RightMachine, Lenght, Width, Thick, Qty, FeedSequence, WorkpieceRotation, FloatingCutter, velocity, LeftEdgeCode, LeftMachiningCode, RightEdgeCode, RightMachiningCode
-
-        # 3:为这个表插入数据
-        # import  pymssql
-        # conn = pymssql.connect('.','sa','123456','PY_DATA')
-        # if conn:
-        #     print("True")
 
         cursor = self.conn.cursor()
-        # a = "松仁、秉峰、泳纪海奉、威剑、颂和、祥益、腾恩、柏铄、孟深、忠庄、轩哲、铠鑫、仕伦、儒亿、积进信钦、贤元、程基、安泉、树昌、祝斌、一科、游湖、普济、中坚"
-        # 'Reference', 'Decor', 'Materialflow', 'BatchNumber', 'CustomerNumber', 'Length','Width', 'Thickness', 'Quantity', 'passValue', 'FeedSpeed', 'Orientation','OverSizeM1', 'EdgeMacroLM1', 'ProgramM1', 'OverSizeM2', 'EdgeMacroRM2', 'ProgramM2'
-        # a = a.split("、")
-        # for i in range(len(a)):
-        #     sql_insert = f"insert into Student Values({i},'{a[i]}',18)"
-        #     print(sql_insert)
-        #     cursor.execute(sql_insert)
-        #     self.conn.commit()
-        # VALUES( % s);' % ', '.join(params)
-        # ",".join(map(str, data))
         sql_insert = 'INSERT INTO HT_EdgeData (CreateTime,Reference,MemoOne,MemoTwo,MemoThree,CustomerNumber,Length,Width,Thickness,Quantity,passValue,FeedSpeed,Orientation,OverSizeM1,EdgeMacroLM1,ProgramM1,OverSizeM2,EdgeMacroRM2,ProgramM2,identifying,UserName) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
         # print(data)
         DataTuple=list(map(tuple, data))
@@ -90,7 +73,17 @@ class SqlUnit():
         self.conn.commit()
         cursor.close()
         return
-        # self.conn.close()
+
+    def InserUnitProduction(self, data):
+        cursor = self.conn.cursor()
+        sql_insert = 'INSERT INTO HT_ProductionData VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+        DataTuple = list(map(tuple, data))
+        # print(DataTuple)
+        # cursor.execute(sql_insert)
+        cursor.executemany(sql_insert, DataTuple)
+        self.conn.commit()
+        cursor.close()
+        return
 
     def InserUnitFive(self,data):
         # CreateTime, code, MemoOne, MemoTwo, MemoThree, LeftMachine, RightMachine, Lenght, Width, Thick, Qty, FeedSequence, WorkpieceRotation, FloatingCutter, velocity, LeftEdgeCode, LeftMachiningCode, RightEdgeCode, RightMachiningCode
