@@ -67,7 +67,7 @@
     </font>
    </property>
    <property name="text">
-    <string>加工文件处理程序</string>
+    <string>加工文件处理系统</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="edt_username">

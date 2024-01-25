@@ -3,8 +3,6 @@
 # 处理xml,得到相关文件
 
 from xml.dom import minidom
-
-import numpy as np
 import pymsgbox as mb
 import logging
 import traceback
@@ -595,7 +593,7 @@ class banding:
                     InsertTime = datetime.datetime.now().strftime("%Y%m%d%H%M")
                     CsvDf.loc[:, 'time'] = InsertTime
                     CsvDf.loc[:, 'WorkShop'] = "五楼"
-                    CsvDf.replace(np.nan, None, inplace=True)
+                    CsvDf = CsvDf.fillna(value='None')
                     CsvDf = CsvDf.values.tolist()
                     SqlUnit.InserUnitProduction(CsvDf)
 

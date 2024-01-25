@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>加工文件处理程序</string>
+   <string>加工文件处理系统</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -23,6 +23,13 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="FourSawed">
+          <property name="text">
+           <string>四边锯</string>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QPushButton" name="pushButton">
           <property name="text">

@@ -1,6 +1,6 @@
 # Author: LiYiXiao
 # 处理xml,得到相关文件
-
+import sys
 from xml.dom import minidom
 import pymsgbox as mb
 import logging
@@ -8,8 +8,10 @@ import traceback
 import os
 import pandas as pd
 import datetime
-import numpy as np
 import lib.Sql as sqlUnit
+
+
+sys.path.append("path")
 
 
 class FourBanding:
@@ -337,9 +339,12 @@ class FourBanding:
 
     # 左机加工编码
     def LeftProcessCode(self, i, panel, PanelBasics, FinishedLength, FinishedWidth, BandingCodingDict, QRCode, IdFile,
-                        CsvIdFileQ, ProcessingDict, n, CsvIdFileT, Grain):
+                        CsvIdFileQ, ProcessingDict, n, CsvIdFileT, Grain, Machines2, CsvIdFileA, CsvIdFileQL):
         """
         左机加工编码
+        :param CsvIdFileQL: 大头板
+        :param CsvIdFileA: 转为A板件
+        :param Machines2: 加工标签，将仅6面槽孔的板件进行A转换
         :param Grain: 纹路
         :param CsvIdFileT: 普通先达未装刀无法打孔的板件条形码
         :param n: 控制厚封边在右机
@@ -633,7 +638,6 @@ class FourBanding:
                 StrName = StrName.replace('5面槽+6面槽', '5&6面槽')
             if '▲▲▲▲' in EBL1:
                 StrName = StrName + '+倒棱'
-
         elif i == 1:
             t = 0
             EBW1 = ''
@@ -888,6 +892,46 @@ class FourBanding:
                 StrName = StrName.replace('6面槽+5面槽', '5&6面槽')
             elif '5面槽+6面槽' in StrName:
                 StrName = StrName.replace('5面槽+6面槽', '5&6面槽')
+        # if Machines2:
+        #     FaceOne, FaceX, FaceFive = 0, 0, 0
+        #     for Machining in Machines2:
+        #         macing = Machining.getElementsByTagName("Machining")
+        #         for index, q in enumerate(macing):
+        #             if q.getAttribute('Face') == '1' or q.getAttribute('Face') == '2':
+        #                 FaceOne = 1
+        #             if q.getAttribute('Face') == '5':
+        #                 FaceFive = 1
+        #             if q.getAttribute('Type') == '3':
+        #                 FaceX = 1
+        #             if index == len(macing) - 1:
+        #                 if FaceOne != 1 and FaceX != 1 and FaceFive != 1 and ('+6面槽' in StrName) \
+        #                         and QRCode not in CsvIdFileQL and Grain == 'L':
+        #                     StrName = StrName.replace('6', '5')
+        #                     panel.setAttribute('Info6', "A")
+        #                     CsvIdFileA.append(QRCode)
+        #                     for index2, q2 in enumerate(macing):
+        #                         if q2.getAttribute('Type') == '2':
+        #                             X = float(q2.getAttribute('X'))
+        #                             q2.setAttribute('Face', "5")
+        #                             q2.setAttribute('X', f'{FinishedLength - X}')
+        #                         elif q2.getAttribute('Type') == '4':
+        #                             X = float(q2.getAttribute('X'))
+        #                             EndX = float(q2.getAttribute('EndX'))
+        #                             q2.setAttribute('Face', "5")
+        #                             q2.setAttribute('X', f'{FinishedLength - X}')
+        #                             q2.setAttribute('EndX', f'{FinishedLength - EndX}')
+        #                         elif q2.getAttribute('Type') == '1':
+        #                             Face = q2.getAttribute('Face')
+        #                             Thickness = float(panel.getAttribute('Thickness'))
+        #                             Z = float(q2.getAttribute('Z'))
+        #                             if Face == '3':
+        #                                 q2.setAttribute('Face', "4")
+        #                                 q2.setAttribute('X', "0")
+        #                                 q2.setAttribute('Z', f'{Thickness - Z}')
+        #                             elif Face == '4':
+        #                                 q2.setAttribute('Face', "3")
+        #                                 q2.setAttribute('X', f'{FinishedLength}')
+        #                                 q2.setAttribute('Z', f'{Thickness - Z}')
         LeftProcessingCode = ProcessingDict[StrName]
         PanelBasics.append(LeftProcessingCode)
 
@@ -895,9 +939,13 @@ class FourBanding:
 
     # 侧板 左机加工编码
     def LeftProcessCodeSide(self, i, panel, PanelBasics, FinishedLength, FinishedWidth, BandingCodingDict, QRCode,
-                            IdFile, CsvIdFileQ, ProcessingDict, n, CsvIdFileT, Grain):
+                            IdFile, CsvIdFileQ, ProcessingDict, n, CsvIdFileT, Grain, Machines2,
+                            CsvIdFileA, CsvIdFileQL):
         """
         左机加工编码
+        :param CsvIdFileQL: 大头板
+        :param CsvIdFileA: 转为A板件
+        :param Machines2: 加工标签，将仅6面槽孔的板件进行A转换
         :param Grain: 纹路
         :param CsvIdFileT: 普通先达未装刀无法打孔的板件条形码
         :param n: 控制厚封边在右机
@@ -1397,6 +1445,47 @@ class FourBanding:
                 StrName = StrName.replace('6面槽+5面槽', '5&6面槽')
             elif '5面槽+6面槽' in StrName:
                 StrName = StrName.replace('5面槽+6面槽', '5&6面槽')
+
+        # if Machines2:
+        #     FaceOne, FaceX, FaceFive = 0, 0, 0
+        #     for Machining in Machines2:
+        #         macing = Machining.getElementsByTagName("Machining")
+        #         for index, q in enumerate(macing):
+        #             if q.getAttribute('Face') == '1' or q.getAttribute('Face') == '2':
+        #                 FaceOne = 1
+        #             if q.getAttribute('Face') == '5':
+        #                 FaceFive = 1
+        #             if q.getAttribute('Type') == '3':
+        #                 FaceX = 1
+        #             if index == len(macing) - 1:
+        #                 if FaceOne != 1 and FaceX != 1 and FaceFive != 1 and ('+6面槽' in StrName) \
+        #                         and QRCode not in CsvIdFileQL and Grain == 'L':
+        #                     StrName = StrName.replace('6', '5')
+        #                     panel.setAttribute('Info6', "A")
+        #                     CsvIdFileA.append(QRCode)
+        #                     for index2, q2 in enumerate(macing):
+        #                         if q2.getAttribute('Type') == '2':
+        #                             X = float(q2.getAttribute('X'))
+        #                             q2.setAttribute('Face', "5")
+        #                             q2.setAttribute('X', f'{FinishedLength - X}')
+        #                         elif q2.getAttribute('Type') == '4':
+        #                             X = float(q2.getAttribute('X'))
+        #                             EndX = float(q2.getAttribute('EndX'))
+        #                             q2.setAttribute('Face', "5")
+        #                             q2.setAttribute('X', f'{FinishedLength - X}')
+        #                             q2.setAttribute('EndX', f'{FinishedLength - EndX}')
+        #                         elif q2.getAttribute('Type') == '1':
+        #                             Face = q2.getAttribute('Face')
+        #                             Thickness = float(panel.getAttribute('Thickness'))
+        #                             Z = float(q2.getAttribute('Z'))
+        #                             if Face == '3':
+        #                                 q2.setAttribute('Face', "4")
+        #                                 q2.setAttribute('X', "0")
+        #                                 q2.setAttribute('Z', f'{Thickness-Z}')
+        #                             elif Face == '4':
+        #                                 q2.setAttribute('Face', "3")
+        #                                 q2.setAttribute('X', f'{FinishedLength}')
+        #                                 q2.setAttribute('Z', f'{Thickness - Z}')
         LeftProcessingCode = ProcessingDict[StrName]
         PanelBasics.append(LeftProcessingCode)
 
@@ -1749,11 +1838,13 @@ class FourBanding:
                         if ('侧板' in PanelName) or ('左侧' in PanelName) or ('右侧' in PanelName):
                             t, StrName = self.LeftProcessCodeSide(i, panel, PanelBasics, FinishedLength, FinishedWidth,
                                                                   BandingCodingDict, QRCode, IdFile, CsvIdFileKc,
-                                                                  BandingProcessingDict, n, CsvIdFileT, Grain)
+                                                                  BandingProcessingDict, n, CsvIdFileT, Grain,
+                                                                  Machines2, CsvIdFileA, CsvIdFileQL)
                         else:
                             t, StrName = self.LeftProcessCode(i, panel, PanelBasics, FinishedLength, FinishedWidth,
                                                               BandingCodingDict, QRCode, IdFile, CsvIdFileKc,
-                                                              BandingProcessingDict, n, CsvIdFileT, Grain)
+                                                              BandingProcessingDict, n, CsvIdFileT, Grain, Machines2,
+                                                              CsvIdFileA, CsvIdFileQL)
 
                         # 15.浮动铣刀
                         if CheckBox:
@@ -1862,7 +1953,6 @@ class FourBanding:
                                                         FaceEB != 1:
                                                     panel.setAttribute('Info6', "A")
                                                     CsvIdFileA.append(QRCode)
-                        #                         # print(QRCode)
                         else:
                             if (QRCode not in CsvIdFileQL) or (not (
                                     '▲' in panel.getAttribute('EBL2') and '△' in panel.getAttribute('EBL1') and
@@ -1897,7 +1987,8 @@ class FourBanding:
                     InsertTime = datetime.datetime.now().strftime("%Y%m%d%H%M")
                     csvDf.loc[:, 'time'] = InsertTime
                     csvDf.loc[:, 'WorkShop'] = "四楼"
-                    csvDf.replace(np.nan, None, inplace=True)
+                    csvDf = csvDf.fillna(value='None')
+                    # csvDf = csvDf.replace(numpy.nan, None)
                     csvDf = csvDf.values.tolist()
                     SqlUnit.InserUnitProduction(csvDf)
 

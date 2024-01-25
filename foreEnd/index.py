@@ -33,7 +33,7 @@ class Win_Main:
         self.ui.Buttonbanding2.clicked.connect(self.BandingExtFive)
         self.ui.MprProcessing.clicked.connect(self.MprProcessing)
         self.ui.pushButton.clicked.connect(self.statistics)
-        # self.ui.FourSawed.clicked.connect(self.FourSawed)
+        self.ui.FourSawed.clicked.connect(self.FourSawed)
         self.ui.sqlActionc.triggered.connect(self.sqlAction)
         self.ui.VersionAction.triggered.connect(self.about)
 
@@ -50,7 +50,7 @@ class Win_Main:
         QMessageBox.about(
             self.ui,
             '版本信息',
-            '加工文件处理程序V4.2.8\n2023.1.12')
+            '加工文件处理系统V4.2.9\n2023.1.25')
 
     @staticmethod
     def PatchSignIn():
@@ -85,7 +85,7 @@ class Win_Main:
             self.ui.Buttonbanding2.setEnabled(False)
             self.ui.MprProcessing.setEnabled(False)
             self.ui.pushButton.setEnabled(False)
-            # self.ui.FourSawed.setEnabled(False)
+            self.ui.FourSawed.setEnabled(False)
             self.ui.textBrowser.append('开始处理')
 
             def run():
@@ -112,7 +112,7 @@ class Win_Main:
                 self.ui.Buttonbanding2.setEnabled(True)
                 self.ui.MprProcessing.setEnabled(True)
                 self.ui.pushButton.setEnabled(True)
-                # self.ui.FourSawed.setEnabled(True)
+                self.ui.FourSawed.setEnabled(True)
                 SqlUnit.conn.close()
                 print('关闭成功')
 
@@ -170,7 +170,7 @@ class Win_Main:
             self.ui.Buttonbanding2.setEnabled(False)
             self.ui.MprProcessing.setEnabled(False)
             self.ui.pushButton.setEnabled(False)
-            # self.ui.FourSawed.setEnabled(False)
+            self.ui.FourSawed.setEnabled(False)
             self.ui.textBrowser.append('开始处理')
 
             def run():
@@ -191,7 +191,7 @@ class Win_Main:
                 self.ui.Buttonbanding2.setEnabled(True)
                 self.ui.MprProcessing.setEnabled(True)
                 self.ui.pushButton.setEnabled(True)
-                # self.ui.FourSawed.setEnabled(True)
+                self.ui.FourSawed.setEnabled(True)
 
                 SqlUnit.conn.close()
                 print('关闭成功')
@@ -207,7 +207,7 @@ class Win_Main:
                 "用户无权限")
 
     def MprProcessing(self):
-        if int(self.authority) < 4:
+        if int(self.authority) < 3:
             settings = QSettings("config.ini", QSettings.IniFormat)
             MprInput = settings.value("MprInput")
             MprOutput = settings.value("MprOutput")
@@ -216,7 +216,7 @@ class Win_Main:
             self.ui.Buttonbanding2.setEnabled(False)
             self.ui.MprProcessing.setEnabled(False)
             self.ui.pushButton.setEnabled(False)
-            # self.ui.FourSawed.setEnabled(False)
+            self.ui.FourSawed.setEnabled(False)
             self.ui.textBrowser.append('开始处理')
 
             def run():
@@ -231,7 +231,7 @@ class Win_Main:
                 self.ui.Buttonbanding2.setEnabled(True)
                 self.ui.MprProcessing.setEnabled(True)
                 self.ui.pushButton.setEnabled(True)
-                # self.ui.FourSawed.setEnabled(True)
+                self.ui.FourSawed.setEnabled(True)
 
             # 多线程运行
             t = Thread(target=run)
@@ -252,7 +252,7 @@ class Win_Main:
             self.ui.Buttonbanding2.setEnabled(False)
             self.ui.MprProcessing.setEnabled(False)
             self.ui.pushButton.setEnabled(False)
-            # self.ui.FourSawed.setEnabled(False)
+            self.ui.FourSawed.setEnabled(False)
             self.ui.textBrowser.append('开始处理')
 
             def run():
@@ -265,7 +265,7 @@ class Win_Main:
                 self.ui.Buttonbanding2.setEnabled(True)
                 self.ui.MprProcessing.setEnabled(True)
                 self.ui.pushButton.setEnabled(True)
-                # self.ui.FourSawed.setEnabled(True)
+                self.ui.FourSawed.setEnabled(True)
 
             # 多线程运行
             t = Thread(target=run)
@@ -278,9 +278,9 @@ class Win_Main:
                 "用户无权限")
 
     def FourSawed(self):
-        if int(self.authority) < 3:
+        if int(self.authority) < 4:
             settings = QSettings("config.ini", QSettings.IniFormat)
-            XmlOutput = settings.value("XmlOutput")
+            SawCsvOutput = settings.value("SawCsvOutput")
             # 按钮禁用
             self.ui.Buttonbanding.setEnabled(False)
             self.ui.Buttonbanding2.setEnabled(False)
@@ -292,8 +292,15 @@ class Win_Main:
             def run():
                 self.ui.textBrowser.append(f'正在处理四锯边,请稍后.........')
                 self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
-                FourSawed.main(XmlOutput)
-                self.ui.textBrowser.append(f'四锯边处理完成')
+                lsi = FourSawed.main(SawCsvOutput)
+                num = 0
+                for i in lsi:
+                    num += 1
+                    self.ui.textBrowser.append(i)
+                    time.sleep(0.2)
+                    # 定位鼠标到最后一行中
+                    self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
+                self.ui.textBrowser.append(f'四锯边处理完成,共处理{num}个文件')
                 self.ui.textBrowser.moveCursor(self.ui.textBrowser.textCursor().End)
                 self.ui.Buttonbanding.setEnabled(True)
                 self.ui.Buttonbanding2.setEnabled(True)
